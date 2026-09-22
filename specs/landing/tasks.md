@@ -98,7 +98,7 @@ phase 4 or the accessibility work in phase 7.
 - [ ] 5.2 First deploy, then assert every route in the route map returns 200
   - `curl -o /dev/null -w '%{http_code}'`
   - _Requirements: REQ-UBI-03, AC-01_
-- [ ] 5.3 Add the Cloudflare Web Analytics beacon, guarded so that a blocked script changes nothing
+- [x] 5.3 Add the Cloudflare Web Analytics beacon, guarded so that a blocked script changes nothing
   - The token comes from the leader's Cloudflare account and lives in `site.config.ts`, never
     inline in a component
   - _Requirements: REQ-UBI-08, REQ-ERR-04_
@@ -107,8 +107,8 @@ phase 4 or the accessibility work in phase 7.
 
 ## Phase 6: Content and Vietnamese
 
-- [ ] 6.1 Replace placeholder copy with the leader's final wording, English
-  - _Requirements: open question Q3_
+- [x] 6.1 Replace placeholder copy with the leader's final wording, English
+  - _Requirements: Q3, resolved 2026-09-23. The leader approved the drafted hero and problem copy as final._
 - [ ] 6.2 Populate `vi.json` as far as translation allows, relying on visible fallback for the rest
   - _Requirements: REQ-STA-04_
 - [ ] 6.3 Swap in real product photographs as they arrive, by file drop only
