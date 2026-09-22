@@ -1,0 +1,20 @@
+# Build output and dependencies
+dist/
+node_modules/
+.astro/
+
+# Astro and Vite caches
+.vite/
+*.tsbuildinfo
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+
+# Personal scratch, per the conventions
+ignore/

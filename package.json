@@ -1,0 +1,36 @@
+{
+  "name": "treklink-landing",
+  "version": "0.1.0",
+  "description": "TrekLink public landing site. Astro, statically built, deployed to GitHub Pages.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run",
+    "prose": "python3 .github/scripts/check_prose.py",
+    "placeholders": "node scripts/make-placeholders.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TrekLink-Team/TrekLink-Team.github.io.git"
+  },
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/TrekLink-Team/TrekLink-Team.github.io/issues"
+  },
+  "homepage": "https://github.com/TrekLink-Team/TrekLink-Team.github.io#readme",
+  "dependencies": {
+    "@astrojs/check": "^0.9.10",
+    "astro": "^7.3.3",
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@fontsource-variable/oswald": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3",
+    "vitest": "^5.0.1"
+  },
+  "private": true
+}

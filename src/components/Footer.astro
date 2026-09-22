@@ -1,0 +1,123 @@
+---
+import { useTranslations, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const year = new Date().getFullYear();
+
+/*
+ * REQ-UBI-07: no team names, no team photographs, no university mark. The
+ * project code is the institution's own identifier for the work rather than
+ * personal information, so it stays.
+ */
+const links = [
+  { href: 'https://github.com/TrekLink-Team', label: t('footer.repo') },
+  {
+    href: 'https://github.com/TrekLink-Team/treklink-docs',
+    label: t('footer.docs'),
+  },
+];
+---
+
+<footer class="site-footer" aria-label={t('footer.heading')}>
+  <div class="shell inner">
+    <div class="brand">
+      <span class="wordmark">
+        <span class="mark" aria-hidden="true"></span>
+        TrekLink
+      </span>
+      <p class="tagline">{t('footer.tagline')}</p>
+    </div>
+
+    <nav class="links" aria-label={t('footer.heading')}>
+      <ul>
+        {
+          links.map((l) => (
+            <li>
+              <a href={l.href} rel="noopener noreferrer">
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <div class="shell rule">
+    <p class="rights">&copy; {year} {t('footer.rights')}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--surface-sunken);
+    border-top: 1px solid var(--surface-ridge);
+    padding-block: clamp(2.5rem, 2rem + 2vw, 3.5rem) 1.5rem;
+  }
+
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: space-between;
+    align-items: start;
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .mark {
+    width: 1.2rem;
+    height: 1.2rem;
+    background: var(--brass);
+    clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
+  }
+
+  .tagline {
+    margin-top: 0.7rem;
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    max-width: 34ch;
+  }
+
+  .links ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+  .links a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    font-size: var(--step--1);
+    font-weight: 600;
+    border-bottom: 1px solid transparent;
+  }
+  .links a:hover {
+    color: var(--moss);
+    border-bottom-color: var(--moss-deep);
+  }
+
+  .rule {
+    margin-top: 2.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--surface-ridge);
+  }
+  .rights {
+    color: var(--ink-faint);
+    font-size: var(--step--1);
+  }
+</style>

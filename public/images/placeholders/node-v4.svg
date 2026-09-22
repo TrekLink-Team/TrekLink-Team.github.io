@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="Node v4 placeholder">
+  <title>Node v4 placeholder</title>
+  <desc>A typographic stand-in at 4 : 3. Replace with public/images/products/node-v4 at the same ratio; no code change is required.</desc>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a2015"/>
+      <stop offset="1" stop-color="#0e120b"/>
+    </linearGradient>
+    <pattern id="grain" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(3)">
+      <rect width="9" height="9" fill="none"/>
+      <rect width="2" height="9" fill="#000" opacity=".22"/>
+      <rect x="4" width="1" height="9" fill="#96784620" />
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)"/>
+  <rect width="800" height="600" fill="url(#grain)"/>
+  <rect x="12" y="12" width="776" height="576" fill="none" stroke="#8faf74" stroke-opacity=".28" stroke-width="2" stroke-dasharray="14 10" rx="6"/>
+  <g fill="none" stroke="#c08a3e" stroke-opacity=".5" stroke-width="2">
+    <path d="M340 264 l60 -42.00000000000001 l60 42.00000000000001"/>
+    <circle cx="400" cy="264" r="102.00000000000001"/>
+  </g>
+  <text x="400" y="402" text-anchor="middle" font-family="Oswald, Impact, sans-serif" font-size="60" font-weight="700" letter-spacing="7.2" fill="#dce3d4" opacity=".92">NODE V4</text>
+  <text x="400" y="462" text-anchor="middle" font-family="Manrope, system-ui, sans-serif" font-size="30" letter-spacing="6" fill="#7c8a70">PHOTOGRAPH PENDING &#183; 4 : 3 &#183; 800&#215;600</text>
+</svg>

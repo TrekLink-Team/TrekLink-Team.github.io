@@ -1,0 +1,70 @@
+{
+  "_comment": "Vietnamese catalogue. Partial on purpose: any key absent here falls back to the English string (REQ-STA-04), which is the honest state while translation is in progress. AGENTS.md 2.4 requires English everywhere in the repository; a product locale catalogue is the content being localised rather than project prose, so Vietnamese belongs here and nowhere else.",
+
+  "meta.title": "TrekLink: Mạng lưới LoRa an toàn cho những cung đường mất sóng",
+  "meta.description": "TrekLink là mạng lưới LoRa giúp đoàn trekking giữ liên lạc ở nơi sóng di động không tới, truyền vị trí, trạng thái và tín hiệu SOS giữa các thiết bị, rồi đồng bộ về trạm khi có kết nối trở lại.",
+
+  "skip.toContent": "Tới nội dung chính",
+
+  "nav.product": "Sản phẩm",
+  "nav.problem": "Vấn đề",
+  "nav.nodes": "Thiết bị",
+  "nav.research": "Nghiên cứu",
+  "nav.label": "Điều hướng theo mục",
+  "nav.menu.open": "Mở menu",
+  "nav.menu.close": "Đóng menu",
+
+  "system.link": "Mở hệ thống",
+  "system.checking": "Đang kiểm tra",
+  "system.unavailable.title": "Hệ thống vận hành hiện không truy cập được",
+  "system.unavailable.body": "Trang này không phụ thuộc vào hệ thống đó. Vui lòng thử lại sau giây lát.",
+  "system.unavailable.dismiss": "Đóng",
+
+  "lang.label": "Ngôn ngữ",
+  "lang.en": "English",
+  "lang.vi": "Tiếng Việt",
+
+  "hero.eyebrow": "Mạng LoRa · Từ thực địa về trạm",
+  "hero.headline.a": "Khi sóng không còn,",
+  "hero.headline.b": "mạng lưới vẫn tiếp tục",
+  "hero.sub": "Vị trí, trạng thái và một nút SOS được truyền từ thiết bị này sang thiết bị khác qua địa hình không có trạm phát sóng nào phủ tới. Trạm nhận được mọi sự kiện ngay khi có kết nối trở lại.",
+  "hero.cta.primary": "Xem thiết bị",
+  "hero.cta.secondary": "Cách hoạt động",
+  "hero.status.label": "Trạng thái mạng",
+  "hero.status.value": "Hoạt động không cần trạm phát",
+
+  "stat.versions.label": "Phiên bản thiết bị đang dùng",
+  "stat.prealarm.label": "Để hủy báo động té ngã sai trước khi gửi đi",
+  "stat.towers.label": "Trạm phát sóng cần giữa các thiết bị",
+
+  "problem.eyebrow": "Vấn đề",
+  "problem.heading": "Một cung đường nhiều ngày là nhiều ngày mất liên lạc",
+  "problem.without.label": "Không có mạng lưới",
+  "problem.with.label": "Có TrekLink",
+
+  "nodes.eyebrow": "Phần cứng",
+  "nodes.heading": "Một thiết bị, ba phiên bản",
+  "nodes.carousel.label": "Các phiên bản thiết bị",
+  "nodes.prev": "Phiên bản trước",
+  "nodes.next": "Phiên bản tiếp theo",
+  "nodes.spec.board": "Bo mạch",
+  "nodes.spec.sos": "SOS",
+  "nodes.spec.uplink": "Kết nối",
+
+  "node.v2.sos": "Nút SOS riêng",
+  "node.v3.sos": "Giữ ba giây",
+  "node.v4.sos": "Giữ ba giây",
+
+  "research.eyebrow": "Nghiên cứu và phát triển",
+  "research.heading": "Dự án này bổ sung điều gì",
+
+  "footer.tagline": "Nền tảng an toàn và vận hành trekking trên mạng lưới LoRa.",
+  "footer.repo": "Mã nguồn trên GitHub",
+  "footer.docs": "Tài liệu kỹ thuật",
+  "footer.heading": "Chân trang",
+
+  "notfound.title": "Không tìm thấy trang",
+  "notfound.heading": "Lạc khỏi đường mòn",
+  "notfound.body": "Trang này không tồn tại. Liên kết có thể đã cũ hoặc bị gõ sai.",
+  "notfound.cta": "Về trang chủ"
+}
