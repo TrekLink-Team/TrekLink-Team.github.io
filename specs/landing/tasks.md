@@ -11,13 +11,13 @@ phase 4 or the accessibility work in phase 7.
 
 ## Phase 0: Repository and hosting
 
-- [ ] 0.1 Create the GitHub repository `TrekLink-Team/TrekLink-Team.github.io`, public, and add it
+- [x] 0.1 Create the GitHub repository `TrekLink-Team/TrekLink-Team.github.io`, public, and add it
       as the `origin` remote of the existing local repository
   - The name is fixed by GitHub: a user or organisation site must match `<owner>.github.io`
   - _Requirements: REQ-UBI-01_
-- [ ] 0.2 Create `main` and `dev`, apply the branch model and protection from convention 07
+- [x] 0.2 Create `main` and `dev`, apply the branch model and protection from convention 07
   - _Requirements: none, process_
-- [ ] 0.3 Set Pages source to **GitHub Actions** in repository settings, not a branch
+- [x] 0.3 Set Pages source to **GitHub Actions** in repository settings, not a branch
   - _Requirements: REQ-UBI-03_
 - [ ] 0.4 Copy `.github/` from `treklink-docs` for the PR and issue templates, and add the repo to
       the canonical `AGENTS.md` §1 layout table in all four existing copies plus this one
