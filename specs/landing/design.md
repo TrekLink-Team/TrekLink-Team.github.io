@@ -139,7 +139,7 @@ the keyboard, and announces item changes through a live region (REQ-EVT-07).
 | `operationsUrl` | Where the header link goes | placeholder until the backend is deployed, open question Q1 |
 | `healthEndpoint` | What the availability check requests | placeholder, Q1 |
 | `healthTimeoutMs` | Abort threshold | `3000` |
-| `analyticsToken` | Cloudflare Web Analytics site token | empty string until the leader supplies it. Empty means the beacon is not rendered at all, phase 5 |
+| `analyticsId` | Cloudflare Web Analytics site token | placeholder until the leader supplies the token, phase 5 |
 | `site` | Canonical origin, used for absolute URLs | `https://treklink-team.github.io` |
 
 ---

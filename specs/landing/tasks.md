@@ -98,7 +98,7 @@ phase 4 or the accessibility work in phase 7.
 - [ ] 5.2 First deploy, then assert every route in the route map returns 200
   - `curl -o /dev/null -w '%{http_code}'`
   - _Requirements: REQ-UBI-03, AC-01_
-- [x] 5.3 Add the Cloudflare Web Analytics beacon, guarded so that a blocked script changes nothing
+- [ ] 5.3 Add the Cloudflare Web Analytics beacon, guarded so that a blocked script changes nothing
   - The token comes from the leader's Cloudflare account and lives in `site.config.ts`, never
     inline in a component
   - _Requirements: REQ-UBI-08, REQ-ERR-04_
