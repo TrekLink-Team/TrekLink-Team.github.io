@@ -1,5 +1,6 @@
 ---
 import { useTranslations, type Locale } from '../i18n';
+import { media } from '../lib/media';
 
 interface Props {
   locale: Locale;
@@ -51,10 +52,10 @@ const capabilities = [
 
     <div class="plate hero-plate">
       <img
-        src="/images/placeholders/node-hero.svg"
+        src={media.hero.src}
         alt={t('hero.plate.alt')}
-        width="1200"
-        height="675"
+        width={media.hero.width}
+        height={media.hero.height}
         loading="eager"
         fetchpriority="high"
       />

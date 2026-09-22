@@ -71,12 +71,22 @@ const canonical = new URL(localePath(locale), siteConfig.site).href;
     />
 
     <meta name="theme-color" content="#12170f" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
 
     {/*
       Cookieless, so no consent banner is required (REQ-UBI-08). Rendered only
-      once a token exists, and `defer` plus the absence of any dependent code
-      means a blocked or failed beacon changes nothing (REQ-ERR-04).
+      once a token exists, so an unset token emits no tag at all rather than a
+      tag carrying a placeholder.
+
+      `type="module"` and `is:inline` together reproduce Cloudflare's own
+      snippet exactly. A module script defers by default, and `is:inline`
+      stops Astro from taking the tag into its own bundling pipeline, which
+      would rewrite the URL that Cloudflare matches the beacon against.
+
+      Nothing on the page reads anything this script defines, so a blocked,
+      failed or ad-blocked beacon changes nothing a visitor can see
+      (REQ-ERR-04).
 
       No `integrity` attribute: Cloudflare publishes this beacon at a stable
       unversioned URL and rolls its contents, so a pinned hash would silently
@@ -88,7 +98,8 @@ const canonical = new URL(localePath(locale), siteConfig.site).href;
     {
       siteConfig.analyticsToken && (
         <script
-          defer
+          is:inline
+          type="module"
           src="https://static.cloudflareinsights.com/beacon.min.js"
           data-cf-beacon={`{"token": "${siteConfig.analyticsToken}"}`}
         />
