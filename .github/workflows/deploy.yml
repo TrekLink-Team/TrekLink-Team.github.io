@@ -1,0 +1,108 @@
+name: Deploy to GitHub Pages
+
+# Task 5.1. Pages is configured with build_type "workflow", so this file is the
+# only thing that publishes the site. There is no gh-pages branch and no
+# .nojekyll gymnastics.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a deploy in flight: a half-published site is worse than a
+# slightly stale one. Queue instead.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # The gates run here rather than only in the pull request check, because
+      # a push to main can arrive by a route that skipped them.
+      - name: Type check
+        run: npm run check
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # REQ-UBI-03: every canonical route must be a real file on disk. If a
+      # route stops emitting HTML, this fails here rather than becoming a 404
+      # that somebody notices from the review panel's laptop.
+      - name: Assert every route emitted real HTML
+        run: |
+          missing=0
+          for f in dist/index.html dist/vi/index.html dist/404.html; do
+            if [ -s "$f" ]; then
+              echo "ok   $f ($(wc -c <"$f") bytes)"
+            else
+              echo "MISSING $f"
+              missing=1
+            fi
+          done
+          exit $missing
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      # AC-01, asserted against the live site rather than against dist. Pages
+      # serves from a CDN that takes a moment to pick up a new deploy, hence
+      # the retries.
+      - name: Assert every route returns 200
+        run: |
+          base="https://treklink-team.github.io"
+          fail=0
+          for path in / /vi/ /images/products/node-hero.webp; do
+            code=""
+            for attempt in 1 2 3 4 5; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$base$path" || echo 000)
+              [ "$code" = "200" ] && break
+              sleep 10
+            done
+            printf '%-40s %s\n' "$path" "$code"
+            [ "$code" = "200" ] || fail=1
+          done
+
+          # A missing page must be a real 404, not a 200 carrying a redirect
+          # shim. REQ-UBI-03 rules that pattern out explicitly.
+          nf=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$base/no-such-page/" || echo 000)
+          printf '%-40s %s\n' "/no-such-page/" "$nf"
+          [ "$nf" = "404" ] || fail=1
+
+          exit $fail

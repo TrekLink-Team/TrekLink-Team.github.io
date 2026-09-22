@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { useTranslations } from '../i18n';
+
+/*
+ * A genuine not-found page (task 5.4). It is NOT the `404.html` redirect
+ * trick: that pattern serves a real page under a 404 status, which damages
+ * indexing and is exactly what REQ-UBI-03 rules out. Every canonical route on
+ * this site is a real file, so nothing needs rescuing here.
+ */
+const locale = 'en' as const;
+const t = useTranslations(locale);
+---
+
+<Base locale={locale} title={`${t('notfound.title')}: TrekLink`} noindex>
+  <Header locale={locale} />
+  <main id="main" class="notfound">
+    <div class="shell">
+      <p class="eyebrow">404</p>
+      <h1>{t('notfound.heading')}</h1>
+      <p class="lede">{t('notfound.body')}</p>
+      <a class="btn btn-primary" href="/">{t('notfound.cta')}</a>
+    </div>
+  </main>
+  <Footer locale={locale} />
+</Base>
+
+<style>
+  .notfound {
+    display: grid;
+    align-content: center;
+    min-height: 60vh;
+    padding-block: var(--section-y);
+  }
+  .notfound .shell {
+    display: grid;
+    gap: 1.2rem;
+    justify-items: start;
+  }
+  h1 {
+    font-size: var(--step-3);
+  }
+</style>

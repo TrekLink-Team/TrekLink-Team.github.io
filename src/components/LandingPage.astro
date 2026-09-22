@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from './Header.astro';
+import Hero from './Hero.astro';
+import Problem from './Problem.astro';
+import NodeLines from './NodeLines.astro';
+import ResearchDevelopment from './ResearchDevelopment.astro';
+import Footer from './Footer.astro';
+import type { Locale } from '../i18n';
+
+/*
+ * The whole document, once. Each locale route is a thin wrapper that passes a
+ * locale, so the two routes cannot drift in structure and a new section is
+ * added in exactly one place.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+---
+
+<Base locale={locale}>
+  <Header locale={locale} />
+  <main id="main">
+    <Hero locale={locale} />
+    <Problem locale={locale} />
+    <NodeLines locale={locale} />
+    <ResearchDevelopment locale={locale} />
+  </main>
+  <Footer locale={locale} />
+</Base>
+
+{/*
+  Four islands, each mounted independently so that a failure in one cannot
+  take the others down. Every one of them upgrades markup that already works,
+  which is what keeps REQ-ERR-05 true.
+*/}
+<script>
+  import { mountSystemLink } from '../islands/system-link';
+  import { mountCarousel } from '../islands/carousel';
+  import { mountScrollspy } from '../islands/scrollspy';
+  import {
+    mountLanguageSwitcher,
+    mountMobileNav,
+  } from '../islands/language-switcher';
+
+  for (const mount of [
+    mountSystemLink,
+    mountCarousel,
+    mountScrollspy,
+    mountLanguageSwitcher,
+    mountMobileNav,
+  ]) {
+    try {
+      mount();
+    } catch (error) {
+      // One broken island must not stop the rest from mounting. The page is
+      // fully readable without any of them, so this is logged and dropped
+      // rather than surfaced to the visitor (REQ-ERR-01).
+      console.error('[island] failed to mount', error);
+    }
+  }
+</script>
