@@ -11,13 +11,13 @@ phase 4 or the accessibility work in phase 7.
 
 ## Phase 0: Repository and hosting
 
-- [ ] 0.1 Create the GitHub repository `TrekLink-Team/TrekLink-Team.github.io`, public, and add it
+- [x] 0.1 Create the GitHub repository `TrekLink-Team/TrekLink-Team.github.io`, public, and add it
       as the `origin` remote of the existing local repository
   - The name is fixed by GitHub: a user or organisation site must match `<owner>.github.io`
   - _Requirements: REQ-UBI-01_
-- [ ] 0.2 Create `main` and `dev`, apply the branch model and protection from convention 07
+- [x] 0.2 Create `main` and `dev`, apply the branch model and protection from convention 07
   - _Requirements: none, process_
-- [ ] 0.3 Set Pages source to **GitHub Actions** in repository settings, not a branch
+- [x] 0.3 Set Pages source to **GitHub Actions** in repository settings, not a branch
   - _Requirements: REQ-UBI-03_
 - [ ] 0.4 Copy `.github/` from `treklink-docs` for the PR and issue templates, and add the repo to
       the canonical `AGENTS.md` §1 layout table in all four existing copies plus this one
@@ -98,7 +98,9 @@ phase 4 or the accessibility work in phase 7.
 - [ ] 5.2 First deploy, then assert every route in the route map returns 200
   - `curl -o /dev/null -w '%{http_code}'`
   - _Requirements: REQ-UBI-03, AC-01_
-- [ ] 5.3 Add cookieless analytics, guarded so that a blocked script changes nothing
+- [ ] 5.3 Add the Cloudflare Web Analytics beacon, guarded so that a blocked script changes nothing
+  - The token comes from the leader's Cloudflare account and lives in `site.config.ts`, never
+    inline in a component
   - _Requirements: REQ-UBI-08, REQ-ERR-04_
 - [ ] 5.4 Add a genuine `404.astro`. It is a not-found page, not a routing workaround
   - _Requirements: REQ-UBI-03_

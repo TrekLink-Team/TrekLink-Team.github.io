@@ -149,5 +149,5 @@ TrekLink service switched off. That independence is the point, not a side effect
 | # | Question | Blocks |
 |---|---|---|
 | Q1 | The exact operations system URL and its health endpoint path. Unknown until the backend is deployed. | Nothing. Configuration carries a placeholder until then, per REQ-UBI-05. |
-| Q2 | Which analytics provider. | Task phase 5 only. |
+| ~~Q2~~ | ~~Which analytics provider.~~ **Resolved 2026-09-22: Cloudflare Web Analytics.** Free, cookieless, one beacon script, and no proxying of the site through Cloudflare is required. GoatCounter was the alternative and was rejected on licensing: its free tier is for non-commercial use, and a graded university project sits ambiguously against that clause. Plausible is paid, and self-hosting Umami would mean running a backend, which contradicts REQ-UBI-01. The leader supplies the account and the site token. | Nothing. |
 | Q3 | Final copy for the hero and the problem section, in the leader's own words. | Content, not structure. Placeholder copy ships first. |
