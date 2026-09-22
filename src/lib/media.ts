@@ -6,8 +6,9 @@
  * one line here, and the layout does not move, because the placeholder was
  * generated at the ratio the layout reserves.
  *
- * The photographs are produced by `scripts/process-photos.sh` from the raw
- * shots in `source-photos/`. Re-run it after dropping a new raw file in.
+ * Photographs arrive already processed from the leader. Drop the file into
+ * `public/images/products/` and change the slot below from `pending` to
+ * `photo` with the file's real intrinsic size. Nothing else moves.
  */
 
 export interface MediaSlot {
@@ -35,23 +36,13 @@ const pending = (src: string, width: number, height: number): MediaSlot => ({
 });
 
 export const media = {
-  /** The hero plate, 16:9. All six units, three of each enclosure form. */
-  hero: photo('/images/products/node-hero.webp', 1600, 900),
+  /** The hero plate, 16:9. */
+  hero: pending('/images/placeholders/node-hero.svg', 1200, 675),
 
   /** The node cards, 4:3. */
-  'node-v2': photo('/images/products/node-v2.webp', 1200, 900),
-
-  /*
-   * v3 is still a stand-in. The only raw shot that contains it is
-   * `v3-vs-v4.jpg`, which holds two units of the same ribbed enclosure form
-   * and nothing in it identifies which is which. Rather than crop one at
-   * random and label it, the slot stays a placeholder until the leader says
-   * which side is v3. Labelling the wrong board in front of a review panel is
-   * a worse outcome than an obvious placeholder.
-   */
+  'node-v2': pending('/images/placeholders/node-v2.svg', 800, 600),
   'node-v3': pending('/images/placeholders/node-v3.svg', 800, 600),
-
-  'node-v4': photo('/images/products/node-v4.webp', 1200, 900),
+  'node-v4': pending('/images/placeholders/node-v4.svg', 800, 600),
 } as const satisfies Record<string, MediaSlot>;
 
 export type MediaKey = keyof typeof media;

@@ -111,7 +111,7 @@ phase 4 or the accessibility work in phase 7.
   - _Requirements: open question Q3_
 - [ ] 6.2 Populate `vi.json` as far as translation allows, relying on visible fallback for the rest
   - _Requirements: REQ-STA-04_
-- [x] 6.3 Swap in real product photographs as they arrive, by file drop only
+- [ ] 6.3 Swap in real product photographs as they arrive, by file drop only
   - _Requirements: REQ-OPT-02, AC-08_
 
 ## Phase 7: Verification and Review 1 readiness
