@@ -25,15 +25,10 @@ const links = [
 <footer class="site-footer" aria-label={t('footer.heading')}>
   <div class="shell inner">
     <div class="brand">
-      <img
-        class="lockup"
-        src="/images/brand/treklink-logo.webp"
-        alt="TrekLink"
-        width="384"
-        height="220"
-        loading="lazy"
-        decoding="async"
-      />
+      <span class="wordmark">
+        <span class="mark" aria-hidden="true"></span>
+        TrekLink
+      </span>
       <p class="tagline">{t('footer.tagline')}</p>
     </div>
 
@@ -72,9 +67,22 @@ const links = [
     align-items: start;
   }
 
-  .lockup {
-    height: 3.4rem;
-    width: auto;
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .mark {
+    width: 1.2rem;
+    height: 1.2rem;
+    background: var(--brass);
+    clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
   }
 
   .tagline {

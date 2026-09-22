@@ -20,16 +20,7 @@ const sections = [
 <header class="site-header">
   <div class="header-rail">
     <a class="wordmark" href={home}>
-      {/* The mark alone. The lockup also carries the word, and setting it
-          twice beside itself would say the name twice. */}
-      <img
-        class="wordmark-mark"
-        src="/images/brand/treklink-mark.webp"
-        alt=""
-        width="312"
-        height="120"
-        aria-hidden="true"
-      />
+      <span class="wordmark-mark" aria-hidden="true"></span>
       <span>TrekLink</span>
     </a>
 
@@ -153,16 +144,12 @@ const sections = [
     white-space: nowrap;
   }
 
-  /*
-   * 2.1rem rather than matching the cap height of the wordmark beside it. The
-   * mark carries signal waves flanking the peaks, and below roughly 40px those
-   * waves collapse into a smear. There is no clean vertical gap to crop them
-   * away at, because they overlap the peaks horizontally, so the answer is to
-   * give the whole mark the room it needs.
-   */
+  /* A pentagon, read as a trail marker rather than as a generic logo box. */
   .wordmark-mark {
-    height: 2.1rem;
-    width: auto;
+    width: 1.35rem;
+    height: 1.35rem;
+    background: var(--brass);
+    clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
     flex: none;
   }
 

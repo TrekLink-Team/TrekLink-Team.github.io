@@ -25,7 +25,7 @@ export const siteConfig = {
    * required (REQ-UBI-08). Empty means the beacon is not rendered at all,
    * which is the correct state until the leader supplies the token.
    */
-  analyticsToken: 'f0000e54d43d415eb25c617b46a36b01',
+  analyticsToken: '',
 } as const;
 
 export type SiteConfig = typeof siteConfig;

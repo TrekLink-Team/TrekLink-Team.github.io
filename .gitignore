@@ -18,15 +18,3 @@ Thumbs.db
 
 # Personal scratch, per the conventions
 ignore/
-
-# Raw camera originals, 59 MB of them, deliberately untracked.
-#
-# This repository is public and the build does not need them: the processed
-# WebP files under public/images/products/ are committed and are what ships.
-# Committing the originals would publish every unused workshop shot and make
-# every clone of a landing site carry 59 MB.
-#
-# Keep them somewhere private and backed up. capstone/Documents is the natural
-# home, since the graded reports want the same photographs. To regenerate the
-# site images, put the originals back here and run scripts/process-photos.sh.
-source-photos/
