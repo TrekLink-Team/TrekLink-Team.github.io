@@ -1,5 +1,6 @@
 ---
 import { useTranslations, type Locale } from '../i18n';
+import { media, type MediaKey } from '../lib/media';
 
 interface Props {
   locale: Locale;
@@ -19,7 +20,7 @@ const cards = nodes.map((v) => ({
   name: t(`node.${v}.name` as 'node.v2.name'),
   body: t(`node.${v}.body` as 'node.v2.body'),
   alt: t(`node.${v}.alt` as 'node.v2.alt'),
-  image: `/images/placeholders/node-${v}.svg`,
+  image: media[`node-${v}` as MediaKey],
   specs: [
     { k: t('nodes.spec.board'), v: t(`node.${v}.board` as 'node.v2.board') },
     { k: t('nodes.spec.sos'), v: t(`node.${v}.sos` as 'node.v2.sos') },
@@ -61,10 +62,10 @@ const cards = nodes.map((v) => ({
             >
               <div class="card-media plate">
                 <img
-                  src={card.image}
+                  src={card.image.src}
                   alt={card.alt}
-                  width="800"
-                  height="600"
+                  width={card.image.width}
+                  height={card.image.height}
                   loading="lazy"
                   decoding="async"
                 />
