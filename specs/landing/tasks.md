@@ -92,7 +92,7 @@ phase 4 or the accessibility work in phase 7.
 
 ## Phase 5: Deployment and analytics
 
-- [ ] 5.1 `.github/workflows/deploy.yml`: build, `upload-pages-artifact`, `deploy-pages`, with
+- [x] 5.1 `.github/workflows/deploy.yml`: build, `upload-pages-artifact`, `deploy-pages`, with
       `pages: write` and `id-token: write`
   - _Requirements: REQ-UBI-01_
 - [ ] 5.2 First deploy, then assert every route in the route map returns 200
@@ -111,7 +111,7 @@ phase 4 or the accessibility work in phase 7.
   - _Requirements: open question Q3_
 - [ ] 6.2 Populate `vi.json` as far as translation allows, relying on visible fallback for the rest
   - _Requirements: REQ-STA-04_
-- [ ] 6.3 Swap in real product photographs as they arrive, by file drop only
+- [x] 6.3 Swap in real product photographs as they arrive, by file drop only
   - _Requirements: REQ-OPT-02, AC-08_
 
 ## Phase 7: Verification and Review 1 readiness
