@@ -19,75 +19,75 @@ phase 4 or the accessibility work in phase 7.
   - _Requirements: none, process_
 - [x] 0.3 Set Pages source to **GitHub Actions** in repository settings, not a branch
   - _Requirements: REQ-UBI-03_
-- [ ] 0.4 Copy `.github/` from `treklink-docs` for the PR and issue templates, and add the repo to
+- [x] 0.4 Copy `.github/` from `treklink-docs` for the PR and issue templates, and add the repo to
       the canonical `AGENTS.md` §1 layout table in all four existing copies plus this one
   - _Requirements: none, process_
 
 ## Phase 1: Scaffold and configuration
 
-- [ ] 1.1 Initialise Astro with TypeScript strict, set `site` to `https://treklink-team.github.io`
+- [x] 1.1 Initialise Astro with TypeScript strict, set `site` to `https://treklink-team.github.io`
       and leave `base` unset, because a user site serves from the root
   - _Requirements: REQ-UBI-03_
-- [ ] 1.2 Add Tailwind, and `src/styles/tokens.css` holding every token from design §5.1
+- [x] 1.2 Add Tailwind, and `src/styles/tokens.css` holding every token from design §5.1
   - No colour literal in a component
   - _Requirements: REQ-UBI-05_
-- [ ] 1.3 Write `site.config.ts` with `operationsUrl`, `healthEndpoint`, `healthTimeoutMs`,
+- [x] 1.3 Write `site.config.ts` with `operationsUrl`, `healthEndpoint`, `healthTimeoutMs`,
       `analyticsId` and `site`, placeholders where the value is not yet known
   - _Requirements: REQ-UBI-05_
-- [ ] 1.4 Write `src/layouts/Base.astro`: head, skip-to-content link, locale wiring, font preload
+- [x] 1.4 Write `src/layouts/Base.astro`: head, skip-to-content link, locale wiring, font preload
   - _Requirements: REQ-UBI-06_
-- [ ] 1.5 Self-host the display and body faces in `public/fonts/`, preloaded
+- [x] 1.5 Self-host the display and body faces in `public/fonts/`, preloaded
   - _Requirements: performance target in requirements §3_
 
 ## Phase 2: Locale system
 
-- [ ] 2.1 Write `src/i18n/index.ts` exporting `t(locale, key)` with English fallback
+- [x] 2.1 Write `src/i18n/index.ts` exporting `t(locale, key)` with English fallback
   - Never returns a raw key
   - _Requirements: REQ-UBI-04, REQ-STA-04_
-- [ ] 2.2 Create `en.json` as the reference catalogue, and `vi.json` seeded with the keys it has
+- [x] 2.2 Create `en.json` as the reference catalogue, and `vi.json` seeded with the keys it has
   - _Requirements: REQ-UBI-04_
-- [ ] 2.3 Unit test: a missing Vietnamese key returns the English string; an unknown key returns
+- [x] 2.3 Unit test: a missing Vietnamese key returns the English string; an unknown key returns
       neither `undefined` nor the key itself
   - _Requirements: REQ-STA-04_
-- [ ] 2.4 Build the `LanguageSwitcher` island: an anchor first, persisting the choice
+- [x] 2.4 Build the `LanguageSwitcher` island: an anchor first, persisting the choice
   - _Requirements: REQ-EVT-05_
 
 ## Phase 3: Static sections
 
-- [ ] 3.1 `Header`, sticky, with section navigation, the switcher slot and the system link slot.
+- [x] 3.1 `Header`, sticky, with section navigation, the switcher slot and the system link slot.
       Below the mobile breakpoint it becomes a disclosure control
   - _Requirements: REQ-STA-03, question 11_
-- [ ] 3.2 `Hero`, the product advert. One photograph, headline, subheadline. No system call to
+- [x] 3.2 `Hero`, the product advert. One photograph, headline, subheadline. No system call to
       action in the hero; it lives in the header
   - _Requirements: REQ-EVT-01_
-- [ ] 3.3 `Problem`, written for a general reader
+- [x] 3.3 `Problem`, written for a general reader
   - _Requirements: none, content_
-- [ ] 3.4 `ProductLines`, the card grid that feeds the carousel
+- [x] 3.4 `NodeLines`, the card grid that feeds the carousel
   - _Requirements: none, content_
-- [ ] 3.5 `ResearchDevelopment`, general and professional. No research question identifiers, no
+- [x] 3.5 `ResearchDevelopment`, general and professional. No research question identifiers, no
       metric that has not been measured
   - _Requirements: REQ-UBI-07, question 12_
-- [ ] 3.6 `Footer`
+- [x] 3.6 `Footer`
   - _Requirements: REQ-UBI-07_
-- [ ] 3.7 Generate typographic placeholders into `public/images/placeholders/` at the exact aspect
+- [x] 3.7 Generate typographic placeholders into `public/images/placeholders/` at the exact aspect
       ratios the layout uses, and document the target path for each real photograph
   - _Requirements: REQ-OPT-02, AC-08_
 
 ## Phase 4: The islands
 
-- [ ] 4.1 `SystemLink`: check on activation, never on page load. `AbortController` on the
+- [x] 4.1 `SystemLink`: check on activation, never on page load. `AbortController` on the
       configured timeout. Any rejection or non-success status means unavailable
   - Surfaces no status code, no endpoint, no stack trace
   - _Requirements: REQ-EVT-02, REQ-EVT-03, REQ-EVT-04, REQ-STA-01, REQ-ERR-01, REQ-ERR-02_
-- [ ] 4.2 The unavailability toast: non-blocking, dismissible, announced to assistive technology
+- [x] 4.2 The unavailability toast: non-blocking, dismissible, announced to assistive technology
   - _Requirements: REQ-EVT-04, REQ-UBI-06_
-- [ ] 4.3 Unit test the check against three cases: non-200, network rejection, timeout
+- [x] 4.3 Unit test the check against three cases: non-200, network rejection, timeout
   - _Requirements: REQ-ERR-01, REQ-ERR-02_
-- [ ] 4.4 `Carousel`, keyboard operable, honouring `prefers-reduced-motion`, with a live region
+- [x] 4.4 `Carousel`, keyboard operable, honouring `prefers-reduced-motion`, with a live region
   - _Requirements: REQ-EVT-07, REQ-STA-02_
-- [ ] 4.5 `Scrollspy` on `IntersectionObserver`, setting active state only, never scrolling
+- [x] 4.5 `Scrollspy` on `IntersectionObserver`, setting active state only, never scrolling
   - _Requirements: REQ-EVT-06_
-- [ ] 4.6 Verify the whole page renders and navigates with JavaScript disabled
+- [x] 4.6 Verify the whole page renders and navigates with JavaScript disabled
   - _Requirements: REQ-ERR-05_
 
 ## Phase 5: Deployment and analytics
@@ -102,7 +102,7 @@ phase 4 or the accessibility work in phase 7.
   - The token comes from the leader's Cloudflare account and lives in `site.config.ts`, never
     inline in a component
   - _Requirements: REQ-UBI-08, REQ-ERR-04_
-- [ ] 5.4 Add a genuine `404.astro`. It is a not-found page, not a routing workaround
+- [x] 5.4 Add a genuine `404.astro`. It is a not-found page, not a routing workaround
   - _Requirements: REQ-UBI-03_
 
 ## Phase 6: Content and Vietnamese

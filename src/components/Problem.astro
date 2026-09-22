@@ -1,0 +1,138 @@
+---
+import { useTranslations, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const columns = [
+  {
+    tone: 'without' as const,
+    label: t('problem.without.label'),
+    items: [
+      t('problem.without.a'),
+      t('problem.without.b'),
+      t('problem.without.c'),
+    ],
+  },
+  {
+    tone: 'with' as const,
+    label: t('problem.with.label'),
+    items: [t('problem.with.a'), t('problem.with.b'), t('problem.with.c')],
+  },
+];
+---
+
+<section class="section" id="problem">
+  <div class="shell">
+    <header class="section-head">
+      <p class="eyebrow">{t('problem.eyebrow')}</p>
+      <h2>{t('problem.heading')}</h2>
+      <p class="lede">{t('problem.lede')}</p>
+    </header>
+
+    {/*
+      A two-panel comparison rather than a feature list. The claim this page
+      makes is a difference, so the layout states a difference.
+    */}
+    <div class="compare">
+      {
+        columns.map((col) => (
+          <article class:list={['panel', 'glass', col.tone]}>
+            <h3>{col.label}</h3>
+            <ul>
+              {col.items.map((item) => (
+                <li>
+                  <span class="marker" aria-hidden="true" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .section-head {
+    display: grid;
+    gap: 1rem;
+    max-width: 46rem;
+  }
+  h2 {
+    font-size: var(--step-3);
+  }
+
+  .compare {
+    margin-top: clamp(2.2rem, 1.6rem + 2.6vw, 3.4rem);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .panel {
+    padding: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
+  }
+  .panel h3 {
+    font-size: var(--step-1);
+    letter-spacing: 0.1em;
+  }
+  .panel.without h3 {
+    color: var(--ink-faint);
+  }
+  .panel.with h3 {
+    color: var(--moss);
+  }
+
+  .panel ul {
+    list-style: none;
+    margin: 1.2rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .panel li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.8rem;
+    align-items: start;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  /* A struck-through bar for the without column, a filled one for the with
+     column. Shape carries the meaning, so it survives without colour. */
+  .marker {
+    width: 0.85rem;
+    height: 0.85rem;
+    margin-top: 0.42rem;
+    flex: none;
+    border-radius: 2px;
+  }
+  .without .marker {
+    border: 2px solid var(--ink-faint);
+    background:
+      linear-gradient(
+          to bottom right,
+          transparent calc(50% - 1px),
+          var(--ink-faint) calc(50% - 1px) calc(50% + 1px),
+          transparent calc(50% + 1px)
+        )
+        no-repeat;
+  }
+  .with .marker {
+    background: var(--moss);
+    box-shadow: 0 0 0 3px rgb(143 175 116 / 18%);
+  }
+
+  @media (max-width: 767px) {
+    .compare {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
