@@ -73,7 +73,8 @@ page.
 ```text
 specs/landing/           requirements.md, design.md, tasks.md
 src/
-  components/            Header, Hero, Problem, ProductLines, ResearchDevelopment, Footer
+  components/            Header, Hero, Problem, NodeLines, ResearchDevelopment, Footer
+                         LandingPage composes them once, so the locale routes cannot drift
   islands/               SystemLink, Carousel, Scrollspy, LanguageSwitcher
   layouts/               Base.astro: head, skip link, locale wiring
   pages/                 index.astro, vi/index.astro, 404.astro
@@ -97,7 +98,7 @@ public/
 | `Header` | Wordmark, section navigation, language switcher slot, system link slot. Sticky. |
 | `Hero` | The product advert. One product photograph, headline, subheadline. No call to action into the system here; question 11 puts that link in the header. |
 | `Problem` | What no signal on a trek route costs. Written for a general reader. |
-| `ProductLines` | The device variants, as a card grid feeding the carousel island. |
+| `NodeLines` | The node versions, as a card grid feeding the carousel island. Named for what it holds: the answer to the hardware question was one node in three versions, v2, v3 and v4, so there is no plural product line to show. v1 is excluded by D-005. |
 | `ResearchDevelopment` | The R&D section from question 12. General and professional, no research question identifiers, no metrics that are not yet measured. |
 | `Footer` | Contact, repository link, copyright. |
 
@@ -138,7 +139,7 @@ the keyboard, and announces item changes through a live region (REQ-EVT-07).
 | `operationsUrl` | Where the header link goes | placeholder until the backend is deployed, open question Q1 |
 | `healthEndpoint` | What the availability check requests | placeholder, Q1 |
 | `healthTimeoutMs` | Abort threshold | `3000` |
-| `analyticsId` | Cloudflare Web Analytics site token | placeholder until the leader supplies the token, phase 5 |
+| `analyticsToken` | Cloudflare Web Analytics site token | empty string until the leader supplies it. Empty means the beacon is not rendered at all, phase 5 |
 | `site` | Canonical origin, used for absolute URLs | `https://treklink-team.github.io` |
 
 ---
@@ -167,27 +168,48 @@ Garmin: product photography carries the hierarchy, not iconography.
 Defined once in `src/styles/tokens.css` as CSS custom properties. No colour literal appears in a
 component.
 
-| Token | Role |
-|---|---|
-| `--surface-base` | Desaturated dark olive, the page ground |
-| `--surface-raised` | One step lighter, for neomorphic panels |
-| `--glass-tint`, `--glass-blur` | Glass panel fill and backdrop filter strength |
-| `--ink`, `--ink-muted` | Body and secondary text, both AA against `--surface-base` |
-| `--accent` | A single warm accent, used for the system link and nothing else |
-| `--radius` | Hard geometry, small radius, per the Garmin reading |
+**Resolved on 2026-09-22 to the Timberline direction.** Three directions were built in real CSS
+and reviewed side by side: one close to the Codespot reference, one close to the Visuo reference,
+and this one, written against question 15 rather than against a template. The leader chose this
+one, and instructed that the reference sites be treated as samples rather than as layouts to copy.
+
+| Token | Value | Role |
+|---|---|---|
+| `--surface-base` | `#12170f` | The page ground, desaturated dark olive |
+| `--surface-sunken` | `#0d110b` | Footer and inset wells |
+| `--surface-raised` | `#1a2015` | Neomorphic panels, one step toward the light |
+| `--surface-ridge` | `#222a1c` | Hairlines and dividers that need to read |
+| `--glass-fill-top`, `--glass-fill-bottom`, `--glass-edge`, `--glass-edge-lit`, `--glass-blur` | | Glass panel gradient, its border, its lit top edge and the backdrop filter strength |
+| `--ink` | `#dce3d4` | Body text, 13.4:1 on `--surface-base` |
+| `--ink-muted` | `#a4b098` | Secondary text, 7.6:1 |
+| `--ink-faint` | `#7c8a70` | Labels, 4.6:1, the AA floor for body text |
+| `--brass` | `#c08a3e` | The single warm accent, 6.4:1. Primary controls and the system link |
+| `--brass-deep`, `--brass-lit` | | The pressed face of a brass control, and brass text on a brass fill |
+| `--moss` | `#8faf74` | The secondary accent, 8.2:1 |
+| `--warn` | `#d9a441` | The unavailability toast |
+| `--radius-sm`, `--radius`, `--radius-lg` | `3px`, `5px`, `9px` | Hard geometry. A pill radius reads as a consumer app, which is the wrong register |
+| `--shadow-neo`, `--shadow-glass`, `--shadow-press` | | The three elevations: pressed plate, floating glass, depressible control |
+| `--font-display`, `--font-body` | Oswald, Manrope | §5.2 |
+| `--step--1` to `--step-4` | | Fluid type scale |
+
+Every contrast figure above was computed against `--surface-base`, not against black, and not
+assumed.
 
 ### 5.2 Type
 
-Two families. A heavy condensed display face for headings, carrying the lumber register, and a
-neutral sans for body at a comfortable reading size. Both self-hosted in `public/fonts/` and
-preloaded, so no third-party font request appears on the critical path.
+**Oswald Variable** for display and **Manrope Variable** for body, both SIL Open Font License,
+both self-hosted in `public/fonts/` from their npm sources with the licence text alongside. Latin
+and Vietnamese subsets only, bound by `unicode-range`, so the `/vi/` route renders its diacritics
+correctly and an English visitor never downloads the Vietnamese face. The two latin faces are
+preloaded. No third-party font request appears on the critical path.
 
 ### 5.3 Components
 
-Glass panels come from an existing shadcn-compatible glass registry rather than being written from
-scratch. `glasscn-components` and `shadcn-glass-ui` were both reviewed; either supplies the tiers
-needed. Components are copied into the repository and re-themed against §5.1, never consumed as a
-version-locked package, and reviewed on installation.
+Glass and neomorphic surfaces are two utility classes in `src/styles/global.css`, `.glass` and
+`.plate`, written against §5.1. The design originally proposed copying them from an existing
+shadcn-compatible glass registry. That was dropped once the tokens existed: the whole surface
+treatment is a gradient, a border, a backdrop filter and a shadow, which is smaller than the work
+of re-theming someone else's component and leaves nothing to audit on installation.
 
 Nothing available ships dark military green with wood. That layer is ours. A tiled wood grain sits
 behind the glass panels, because a backdrop filter needs high-frequency detail underneath to read

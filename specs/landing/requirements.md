@@ -17,7 +17,7 @@ panel will see running.
 **In-Scope**
 
 - A public, statically hosted marketing site at `https://treklink-team.github.io/`
-- Product-first content: hero, problem, product lines, research and development, footer
+- Product-first content: hero, problem, node versions, research and development, footer
 - A header link into the operations system, with a live availability check
 - English and Vietnamese through a real locale system, English shipped first
 - Cookieless analytics
