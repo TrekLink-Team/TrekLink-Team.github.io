@@ -218,6 +218,16 @@ as glass at all.
 Element naming in this spec follows [namethatui.com](https://namethatui.com/) so that the spec and
 the implementation use the same words. It is a naming dictionary, not a component source.
 
+The `Hero` stat row is a two-column bento, not three equal columns: the first stat spans the full
+row at full size with a small brass index tab (`01`, `02`, `03`), the other two share the second
+row at a reduced value size. The same two-column shape holds at every viewport, so the small-screen
+layout is the desktop layout, not a separate override. The capability chip list keeps its centred,
+wrapping treatment at tablet and up; below 768px it becomes a single horizontal scroll strip with a
+faded edge instead of wrapping into a multi-line block. Both were chosen from a temporary
+side-by-side comparison page (deleted once decided) against the leader's own weak-point review;
+the hero glow, the chip treatment above 768px, and the wood grain and contour opacities were
+reviewed the same way and kept as shipped.
+
 ### 5.4 Imagery
 
 `public/images/products/` holds the real photographs, supplied by the leader. Until each arrives,
