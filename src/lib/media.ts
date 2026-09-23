@@ -37,12 +37,12 @@ const pending = (src: string, width: number, height: number): MediaSlot => ({
 
 export const media = {
   /** The hero plate, 16:9. */
-  hero: pending('/images/placeholders/node-hero.svg', 1200, 675),
+  hero: photo('/images/products/hero.webp', 1600, 900),
 
   /** The node cards, 4:3. */
-  'node-v2': pending('/images/placeholders/node-v2.svg', 800, 600),
-  'node-v3': pending('/images/placeholders/node-v3.svg', 800, 600),
-  'node-v4': pending('/images/placeholders/node-v4.svg', 800, 600),
+  'node-v2': photo('/images/products/node-v2.webp', 1000, 750),
+  'node-v3': photo('/images/products/node-v3.webp', 1000, 750),
+  'node-v4': photo('/images/products/node-v4.webp', 1000, 750),
 } as const satisfies Record<string, MediaSlot>;
 
 export type MediaKey = keyof typeof media;
