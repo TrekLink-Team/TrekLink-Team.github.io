@@ -37,7 +37,7 @@ const pending = (src: string, width: number, height: number): MediaSlot => ({
 
 export const media = {
   /** The hero plate, 16:9. */
-  hero: photo('/images/products/hero.webp', 1600, 900),
+  hero: photo('/images/products/node-hero.webp', 1600, 900),
 
   /** The node cards, 4:3. */
   'node-v2': photo('/images/products/node-v2.webp', 1000, 750),
