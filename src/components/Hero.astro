@@ -68,8 +68,11 @@ const capabilities = [
 
     <ul class="stats">
       {
-        stats.map((s) => (
-          <li class="glass stat">
+        stats.map((s, i) => (
+          <li class={`glass stat${i === 0 ? ' stat-lead' : ''}`}>
+            <span class="stat-tab" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
             <span class="stat-value">{s.value}</span>
             <span class="stat-label">{s.label}</span>
           </li>
@@ -222,20 +225,40 @@ const capabilities = [
     font-weight: 600;
   }
 
+  /* Ridge-tab bento: the lead stat spans the full row at full size, the
+     other two share a row at a reduced value size. Same two-column shape
+     holds at every width, so mobile gets the compact layout for free
+     instead of a separate override. */
   .stats {
     list-style: none;
     margin: clamp(3rem, 2rem + 4vw, 5rem) 0 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.9rem;
     text-align: left;
   }
   .stat {
-    padding: 1.3rem 1.4rem;
+    position: relative;
+    padding: 1.3rem 1.4rem 1.1rem;
     display: grid;
     gap: 0.5rem;
     align-content: start;
+  }
+  .stat-lead {
+    grid-column: 1 / -1;
+  }
+  .stat-tab {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.85rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step--1);
+    color: var(--brass);
+    background: rgb(192 138 62 / 14%);
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--radius-sm);
   }
   .stat-value {
     font-family: var(--font-display);
@@ -243,6 +266,9 @@ const capabilities = [
     font-size: var(--step-3);
     line-height: 1;
     color: var(--brass);
+  }
+  .stat:not(.stat-lead) .stat-value {
+    font-size: var(--step-1);
   }
   .stat-label {
     font-size: var(--step--1);
@@ -278,15 +304,40 @@ const capabilities = [
   }
 
   @media (max-width: 767px) {
-    .stats {
-      grid-template-columns: 1fr;
-    }
     .hero-status {
       position: static;
       transform: none;
       margin-top: 0.6rem;
       justify-content: center;
       white-space: normal;
+    }
+
+    /* Spec tape: the chip row scrolls horizontally with a fading edge
+       instead of wrapping into a ragged multi-line block. */
+    .capabilities {
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      overflow-x: auto;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        black 1.2rem,
+        black calc(100% - 1.2rem),
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        black 1.2rem,
+        black calc(100% - 1.2rem),
+        transparent 100%
+      );
+    }
+    .capabilities li {
+      flex: none;
+      white-space: nowrap;
     }
   }
 </style>
