@@ -1,3 +1,5 @@
+import { reducedMotion } from '../lib/motion';
+
 /**
  * The node carousel (REQ-EVT-07, REQ-STA-02).
  *
@@ -29,7 +31,6 @@ export function mountCarousel(): void {
   );
   if (!track || !controls.length || !prev || !next || items.length < 2) return;
 
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   let index = -1;
   let frame = 0;
   let snapReleaseTimer = 0;
@@ -78,22 +79,37 @@ export function mountCarousel(): void {
   /**
    * scroll-snap-type: mandatory can truncate a JS scrollTo({behavior:
    * 'smooth'}) partway, the snap machinery intervenes mid-animation and the
-   * track settles short of the requested offset. Suspending snap for the
-   * duration of a programmatic scroll and restoring it once the track
-   * settles avoids that fight while leaving snap-on-release intact for a
-   * real touch swipe.
+   * track settles short of the requested offset. Snap is suspended for the
+   * duration of a programmatic scroll and restored once the track settles,
+   * leaving snap-on-release intact for a real touch swipe.
+   *
+   * "Settled" is `scrollend` where it exists, otherwise a quiet period with
+   * no scroll event. The quiet timer restarts on every scroll event, so a
+   * long smooth scroll across several cards is never cut short by a fixed
+   * deadline, which would hand control back to mandatory snap mid-flight.
    */
-  function scrollTrackTo(left: number): void {
-    track!.style.scrollSnapType = 'none';
+  const SETTLE_MS = 150;
+  let programmatic = false;
+
+  function releaseSnap(): void {
+    if (!programmatic) return;
+    programmatic = false;
     clearTimeout(snapReleaseTimer);
-    const release = () => {
-      clearTimeout(snapReleaseTimer);
-      track!.removeEventListener('scrollend', release);
-      track!.style.scrollSnapType = '';
-    };
-    track!.addEventListener('scrollend', release, { once: true });
-    snapReleaseTimer = window.setTimeout(release, 500);
-    track!.scrollTo({ left, behavior: reduced.matches ? 'auto' : 'smooth' });
+    track!.style.scrollSnapType = '';
+  }
+
+  function armSettle(): void {
+    clearTimeout(snapReleaseTimer);
+    snapReleaseTimer = window.setTimeout(releaseSnap, SETTLE_MS);
+  }
+
+  function scrollTrackTo(left: number): void {
+    programmatic = true;
+    track!.style.scrollSnapType = 'none';
+    // Covers a target equal to the current position, where no scroll event
+    // or scrollend ever fires.
+    armSettle();
+    track!.scrollTo({ left, behavior: reducedMotion() ? 'auto' : 'smooth' });
   }
 
   function goTo(i: number): void {
@@ -118,38 +134,17 @@ export function mountCarousel(): void {
     if (target >= 0) goTo(target);
   }
 
-  /**
-   * A card with zero overlap with the track's visible span is hidden
-   * entirely, not just clipped by overflow. A card that is still laid out
-   * and painted just past the edge still contributes its own glass fill to
-   * what the visible card's backdrop-filter samples underneath it, which
-   * washed the blur out on every card but the one truly alone in view.
-   */
-  function syncOffscreen(): void {
-    if (!isPaged()) {
-      items.forEach((item) => item.removeAttribute('data-offscreen'));
-      return;
-    }
-    const left = track!.scrollLeft;
-    const right = left + track!.clientWidth;
-    items.forEach((item) => {
-      const hidden = item.offsetLeft + item.offsetWidth <= left || item.offsetLeft >= right;
-      item.toggleAttribute('data-offscreen', hidden);
-    });
-  }
-
   function onScroll(): void {
+    if (programmatic) armSettle();
     cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(() => {
-      paint(nearest(), true);
-      syncOffscreen();
-    });
+    frame = requestAnimationFrame(() => paint(nearest(), true));
   }
 
   prev.addEventListener('click', () => step(-1));
   next.addEventListener('click', () => step(1));
   pips.forEach((pip, i) => pip.addEventListener('click', () => goTo(i)));
   track.addEventListener('scroll', onScroll, { passive: true });
+  track.addEventListener('scrollend', releaseSnap);
 
   track.addEventListener('keydown', (event) => {
     if (!isPaged()) return;
@@ -168,7 +163,6 @@ export function mountCarousel(): void {
     root!.toggleAttribute('data-paged', paged);
     index = -1;
     paint(paged ? nearest() : 0, false);
-    syncOffscreen();
   }
 
   sync();

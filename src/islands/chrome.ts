@@ -1,3 +1,5 @@
+import { reducedMotion } from '../lib/motion';
+
 /**
  * Page chrome shared by every route: the theme toggle, the scroll progress
  * bar fallback, the back-to-top button and UTM pass-through.
@@ -81,8 +83,7 @@ export function mountBackToTop(): void {
   );
   link.addEventListener('click', (event) => {
     event.preventDefault();
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
     document.querySelector<HTMLElement>('#main')?.focus({ preventScroll: true });
   });
   update();
