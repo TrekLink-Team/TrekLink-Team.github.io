@@ -107,6 +107,9 @@
   --map-contour: rgb(159 203 107 / 13%);
   --mesh-edge: rgb(159 203 107 / 30%);
 
+  /* Meshtastic's own brand green, used only as the ground of its logo. */
+  --meshtastic-green: #66ea96;
+
   color-scheme: dark;
 
   /* --- Status ------------------------------------------------------------ */
