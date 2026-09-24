@@ -109,10 +109,14 @@ phase 4 or the accessibility work in phase 7.
 
 - [x] 6.1 Replace placeholder copy with the leader's final wording, English
   - _Requirements: Q3, resolved 2026-09-23. The leader approved the drafted hero and problem copy as final._
-- [ ] 6.2 Populate `vi.json` as far as translation allows, relying on visible fallback for the rest
+- [x] 6.2 Populate `vi.json` as far as translation allows, relying on visible fallback for the rest
   - _Requirements: REQ-STA-04_
+  - Complete as of PR #10: the tests now fail on any missing Vietnamese key, so fallback is a safety net only.
 - [ ] 6.3 Swap in real product photographs as they arrive, by file drop only
   - _Requirements: REQ-OPT-02, AC-08_
+  - PR #10 ships renders, declared as `render` in `src/lib/media.ts` and disclosed on the page. This task stays open until real photographs replace them, or the team decides renders are final.
+- [ ] 6.4 Legal review of the Privacy Policy and Terms, and the Meshtastic trademark notification
+  - _Requirements: Q4, Q5_
 
 ## Phase 7: Verification and Review 1 readiness
 

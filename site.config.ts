@@ -5,7 +5,13 @@
  * deployed yet, so its URL and health endpoint are placeholders; open question
  * Q1 in specs/landing/requirements.md tracks that. The placeholders are safe:
  * the health check treats an unreachable endpoint as unavailable and the page
- * shows the toast, which is the behaviour REQ-EVT-04 asks for anyway.
+ * shows the toast, which is the behaviour REQ-EVT-04 asks for anyway. The
+ * deploy workflow warns on every publish while a `.invalid` host remains.
+ *
+ * When the real endpoint lands, it must answer a cross-origin GET from this
+ * site's origin with `Access-Control-Allow-Origin`. Without that header the
+ * browser hides the response, the check reads it as a failure, and the toast
+ * shows forever while the system is actually up.
  */
 export const siteConfig = {
   /** Canonical origin. Used for absolute URLs and the sitemap. */
@@ -19,6 +25,13 @@ export const siteConfig = {
 
   /** Abort threshold for that check. Long enough for a cold backend. */
   healthTimeoutMs: 3000,
+
+  /**
+   * Where privacy and legal requests go. Named in the Privacy Policy and the
+   * Terms. A private channel on purpose: a request filed as a public GitHub
+   * issue would publish the requester's own personal data.
+   */
+  contactEmail: 'treklink.team@gmail.com',
 
   /**
    * Cloudflare Web Analytics site token. Cookieless, so no consent banner is

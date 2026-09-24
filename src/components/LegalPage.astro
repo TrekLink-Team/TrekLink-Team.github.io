@@ -16,10 +16,6 @@ const title = t(kind === 'privacy' ? 'privacy.title' : 'terms.title');
 const meta = t(kind === 'privacy' ? 'privacy.meta' : 'terms.meta');
 const path = `${kind}/`;
 
-/* Split a sentence into text and URL parts, so addresses become links. */
-const parts = (s: string) =>
-  s.split(/(https:\/\/[^\s,)]+[^\s,).])/g).map((p) => ({ url: p.startsWith('https://'), p }));
-
 const date = new Date(doc.updated + 'T00:00:00Z').toLocaleDateString(
   locale === 'vi' ? 'vi-VN' : 'en-GB',
   { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' },
@@ -55,16 +51,20 @@ const date = new Date(doc.updated + 'T00:00:00Z').toLocaleDateString(
           <section id={s.id} class="doc-section glass" aria-labelledby={`${s.id}-h`}>
             <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
             <h2 id={`${s.id}-h`}>{s.heading}</h2>
-            {s.body.map((b) => (
-              <p>
-                {parts(b).map((x) => (x.url ? <a href={x.p} rel="noopener noreferrer">{x.p}</a> : x.p))}
-              </p>
-            ))}
+            {s.body.slice(0, 1).map((b) => <p>{b}</p>)}
             {s.list && (
               <ul>
-                {s.list.map((b) => (
+                {s.list.map((b) => <li>{b}</li>)}
+              </ul>
+            )}
+            {s.body.slice(1).map((b) => <p>{b}</p>)}
+            {s.links && (
+              <ul class="doc-links">
+                {s.links.map((l) => (
                   <li>
-                    {parts(b).map((x) => (x.url ? <a href={x.p} rel="noopener noreferrer">{x.p}</a> : x.p))}
+                    <a href={l.href} rel={l.href.startsWith('https:') ? 'noopener noreferrer' : undefined}>
+                      {l.label}
+                    </a>
                   </li>
                 ))}
               </ul>
