@@ -1,0 +1,63 @@
+name: CI
+
+# The same gates the deploy runs, on every pull request, so a red build is
+# found in review rather than after a merge to main has already tried to
+# publish it. The deploy workflow keeps its own copy of these steps because a
+# push to main can arrive by a route that skipped this check.
+
+on:
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Assert every route emitted real HTML
+        run: |
+          missing=0
+          for f in dist/index.html dist/vi/index.html dist/404.html \
+                   dist/privacy/index.html dist/terms/index.html \
+                   dist/vi/privacy/index.html dist/vi/terms/index.html; do
+            if [ -s "$f" ]; then
+              echo "ok   $f ($(wc -c <"$f") bytes)"
+            else
+              echo "MISSING $f"
+              missing=1
+            fi
+          done
+          exit $missing
+
+      # See astro.config.mjs: a timeline inside the animation shorthand is
+      # dropped by Chromium, and astro dev never minifies, so only a check on
+      # the built CSS catches it.
+      - name: Assert scroll timelines survive minification
+        run: |
+          if grep -hoE 'animation:[^;}]*(scroll|view)\(' dist/_astro/*.css; then
+            echo "A timeline was folded into the animation shorthand."
+            exit 1
+          fi
+          echo "ok   no timeline inside an animation shorthand"

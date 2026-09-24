@@ -37,7 +37,9 @@ const edgeView = edges.map((e) => {
   const [from, to] = hop[e.a]! <= hop[e.b]! ? [e.a, e.b] : [e.b, e.a];
   return { from, to, hop: hop[from]!, same: hop[from] === hop[to] };
 });
+/* The island reads the graph as data, never by parsing the markup back. */
 const adjacency = JSON.stringify(edges.map((e) => [e.a, e.b]));
+const positions = JSON.stringify(nodes.map((n) => [n.x, n.y]));
 ---
 
 <section class="section how grain" id="how" aria-labelledby="how-heading">
@@ -57,7 +59,9 @@ const adjacency = JSON.stringify(edges.map((e) => [e.a, e.b]));
         aria-label={t('how.diagram.label')}
         preserveAspectRatio="xMidYMid meet"
         data-mesh
+        data-loop
         data-edges={adjacency}
+        data-pos={positions}
         data-origin={origin}
         style={`--max-hop:${maxHop}`}
       >
@@ -375,6 +379,15 @@ const adjacency = JSON.stringify(edges.map((e) => [e.a, e.b]));
       animation: drift 40s ease-in-out infinite alternate;
     }
   }
+  /* Offscreen, the wave pauses. The reveal island marks <html> once it is
+     observing looping decorations, so without JavaScript the map still runs.
+     Important because every animation rule above uses the shorthand, which
+     resets play-state, and some of them outrank this selector. */
+  :global(html[data-loops]) .mesh:not([data-running]) *,
+  :global(html[data-loops]) .mesh:not([data-running]) {
+    animation-play-state: paused !important;
+  }
+
   @keyframes node-hit {
     0% {
       transform: scale(1);

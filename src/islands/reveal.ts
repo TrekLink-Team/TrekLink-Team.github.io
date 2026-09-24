@@ -1,3 +1,5 @@
+import { reducedMotion } from '../lib/motion';
+
 /**
  * Reveal fallback for browsers without scroll-driven animations.
  *
@@ -7,10 +9,12 @@
  * Reduced motion: nothing is marked, nothing is hidden.
  *
  * It also starts and stops the looping decorations ([data-loop]) so they only
- * run while on screen.
+ * run while on screen: each gets [data-running] while it intersects, and
+ * <html> gets [data-loops] so a stylesheet may pause the rest. Nothing is
+ * paused unless this is running, so without JavaScript the loops still play.
  */
 export function mountReveal(): void {
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduce = reducedMotion();
 
   const loops = document.querySelectorAll<HTMLElement>('[data-loop]');
   if (loops.length && 'IntersectionObserver' in window && !reduce) {
@@ -18,6 +22,7 @@ export function mountReveal(): void {
       for (const e of entries) e.target.toggleAttribute('data-running', e.isIntersecting);
     });
     loops.forEach((el) => loopIo.observe(el));
+    document.documentElement.setAttribute('data-loops', '');
   }
 
   if (reduce) return;

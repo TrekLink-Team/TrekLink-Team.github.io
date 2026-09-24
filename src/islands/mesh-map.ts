@@ -1,3 +1,6 @@
+import { hops } from '../lib/meshmap';
+import { reducedMotion } from '../lib/motion';
+
 /**
  * Mesh map: a new SOS origin for every wave.
  *
@@ -10,40 +13,22 @@
 export function mountMeshMap(): void {
   const svg = document.querySelector<SVGSVGElement>('[data-mesh]');
   if (!svg) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (reducedMotion()) return;
 
-  const edges = JSON.parse(svg.dataset.edges ?? '[]') as [number, number][];
+  const edges = (JSON.parse(svg.dataset.edges ?? '[]') as [number, number][]).map(
+    ([a, b]) => ({ a, b }),
+  );
+  const pos = JSON.parse(svg.dataset.pos ?? '[]') as [number, number][];
   const nodes = Array.from(svg.querySelectorAll<SVGGElement>('[data-node]'));
   const links = Array.from(svg.querySelectorAll<SVGGElement>('.link'));
   const droplet = svg.querySelector<SVGGElement>('[data-droplet]');
   const trigger = svg.querySelector<SVGCircleElement>('[data-droplet-ring]');
-  if (!nodes.length || !droplet || !trigger) return;
+  if (!nodes.length || pos.length !== nodes.length || !droplet || !trigger) return;
 
-  const pos = nodes.map((n) => {
-    const m = /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(n.getAttribute('style') ?? '');
-    return m ? [Number(m[1]), Number(m[2])] : [0, 0];
-  });
   const candidates = nodes
     .filter((n) => !n.classList.contains('node-station'))
     .map((n) => Number(n.dataset.node));
   let current = Number(svg.dataset.origin);
-
-  function hopsFrom(origin: number): number[] {
-    const out = nodes.map(() => Infinity);
-    out[origin] = 0;
-    const queue = [origin];
-    while (queue.length) {
-      const cur = queue.shift()!;
-      for (const [a, b] of edges) {
-        const o = a === cur ? b : b === cur ? a : -1;
-        if (o >= 0 && out[o] === Infinity) {
-          out[o] = out[cur]! + 1;
-          queue.push(o);
-        }
-      }
-    }
-    return out;
-  }
 
   function wave(): void {
     let next = current;
@@ -51,7 +36,7 @@ export function mountMeshMap(): void {
       next = candidates[Math.floor(Math.random() * candidates.length)]!;
     }
     current = next;
-    const hop = hopsFrom(current);
+    const hop = hops(nodes.length, edges, current);
 
     nodes.forEach((n, i) => {
       n.style.setProperty('--hop', String(hop[i]));
@@ -78,10 +63,7 @@ export function mountMeshMap(): void {
     svg!.classList.add('run');
   }
 
-  // One wave per cycle, and only while the map is on screen.
-  let visible = false;
-  new IntersectionObserver(([e]) => (visible = !!e?.isIntersecting)).observe(svg);
-  trigger.addEventListener('animationiteration', () => {
-    if (visible) wave();
-  });
+  // One wave per cycle. Offscreen the animations are paused (see the reveal
+  // island's [data-loop] handling), so no iteration fires and no wave runs.
+  trigger.addEventListener('animationiteration', wave);
 }

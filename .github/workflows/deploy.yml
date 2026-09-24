@@ -75,6 +75,16 @@ jobs:
           fi
           echo "ok   no timeline inside an animation shorthand"
 
+      # Open question Q1: the operations system is not deployed, so its URL is
+      # a .invalid placeholder and every visitor gets the unavailable toast.
+      # That is safe and intended until the backend exists, so this warns on
+      # every publish instead of failing it.
+      - name: Warn while the operations URL is a placeholder
+        run: |
+          if grep -nE "operationsUrl|healthEndpoint" site.config.ts | grep -F ".invalid"; then
+            echo "::warning file=site.config.ts::The operations system URL is still a .invalid placeholder (Q1)."
+          fi
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
