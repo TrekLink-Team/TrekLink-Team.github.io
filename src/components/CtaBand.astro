@@ -1,0 +1,101 @@
+---
+import { siteConfig } from '../../site.config';
+import { useTranslations, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<section class="cta-band" aria-labelledby="cta-heading">
+  <div class="shell">
+    <div class="cta glass contours" data-reveal>
+      <div class="glow glow-brass cta-glow" aria-hidden="true"></div>
+      <div class="cta-copy above">
+        <h2 id="cta-heading">{t('cta.heading')}</h2>
+        <p>{t('cta.body')}</p>
+      </div>
+      <div class="cta-actions above">
+        <a
+          class="btn btn-primary"
+          href={siteConfig.operationsUrl}
+          data-system-link
+          data-label={t('cta.primary')}
+          data-checking={t('system.checking')}
+          data-toast-message={t('system.toast')}
+          data-toast-dismiss={t('system.unavailable.dismiss')}
+        >
+          <span data-system-link-text>{t('cta.primary')}</span>
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="btn btn-ghost" href="#nodes">{t('cta.secondary')}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-band {
+    padding-bottom: var(--section-y);
+  }
+  .cta {
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) auto;
+    align-items: center;
+    gap: 1.5rem 3rem;
+    padding: clamp(1.6rem, 1rem + 3vw, 3.5rem);
+    background-image: linear-gradient(135deg, var(--brass-tint-strong), var(--moss-tint) 60%, transparent);
+  }
+  .cta-glow {
+    width: 40rem;
+    height: 30rem;
+    right: -12rem;
+    top: -12rem;
+  }
+  .cta-copy {
+    display: grid;
+    gap: 0.9rem;
+  }
+  .cta h2 {
+    font-size: var(--step-3);
+    max-width: 18ch;
+  }
+  .cta p {
+    color: var(--ink-muted);
+    font-size: var(--step-1);
+    max-width: 44ch;
+  }
+  .cta-actions {
+    display: grid;
+    gap: 0.7rem;
+  }
+  .spinner {
+    display: none;
+    width: 0.85em;
+    height: 0.85em;
+    border: 2px solid var(--shade);
+    border-top-color: var(--ink-inverse);
+    border-radius: 50%;
+    animation: cta-spin 700ms linear infinite;
+  }
+  [data-state='checking'] .spinner {
+    display: inline-block;
+  }
+  [data-state='checking'] .arrow {
+    display: none;
+  }
+  @keyframes cta-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (max-width: 759px) {
+    .cta {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

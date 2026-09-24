@@ -9,11 +9,17 @@ describe('t', () => {
     expect(t('vi', 'system.link')).not.toBe(en['system.link']);
   });
 
-  // REQ-STA-04. The fallback is the whole reason Vietnamese may ship partial.
+  // REQ-STA-04. The fallback stays as a safety net for a future key.
   it('falls back to English for a key Vietnamese does not carry', () => {
-    const missing = 'research.a.body' as TranslationKey;
-    expect(vi).not.toHaveProperty(missing);
-    expect(t('vi', missing)).toBe(en[missing]);
+    const catalogue = vi as Record<string, string>;
+    const key = 'hero.sub' as TranslationKey;
+    const saved = catalogue[key];
+    delete catalogue[key];
+    try {
+      expect(t('vi', key)).toBe(en[key]);
+    } finally {
+      catalogue[key] = saved!;
+    }
   });
 
   it('never returns a raw key or undefined for an unknown key', () => {
@@ -47,11 +53,27 @@ describe('catalogue hygiene', () => {
     expect(extra).toEqual([]);
   });
 
-  it('reports partial Vietnamese coverage rather than pretending', () => {
+  it('translates every English key into Vietnamese', () => {
     const { translated, total } = coverage('vi');
-    expect(total).toBeGreaterThan(0);
-    expect(translated).toBeGreaterThan(0);
-    expect(translated).toBeLessThanOrEqual(total);
+    const missing = Object.keys(en).filter((k) => !(k in vi));
+    expect(missing).toEqual([]);
+    expect(translated).toBe(total);
+  });
+
+  it('never ships a Vietnamese value identical to English prose', () => {
+    // Proper nouns, units and board names may legitimately match.
+    const allowed = /^(v\d|0|33|433 MHz|SOS|English|Tiếng Việt|LilyGO.*|Node v\d)$/;
+    const same = Object.keys(en).filter((k) => {
+      const e = (en as Record<string, string>)[k]!;
+      const v = (vi as Record<string, string>)[k];
+      return v === e && !allowed.test(e);
+    });
+    expect(same).toEqual([]);
+  });
+
+  it('uses no em or en dash in any user-facing string', () => {
+    const all = [...Object.values(en), ...Object.values(vi)].join('\n');
+    expect(all).not.toMatch(/[\u2013\u2014]/);
   });
 });
 

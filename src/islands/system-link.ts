@@ -12,8 +12,7 @@ import { siteConfig } from '../../site.config';
  */
 
 interface ToastStrings {
-  title: string;
-  body: string;
+  message: string;
   dismiss: string;
 }
 
@@ -30,16 +29,15 @@ function buildToast(strings: ToastStrings): HTMLElement {
   toast.hidden = true;
   // Static literal, no interpolation. Every translated string below is set
   // through textContent, so no catalogue entry can inject markup here.
+  // One sentence, said once. The toast states the fact and the next step and
+  // nothing else; the page around it already shows that nothing is broken.
   toast.innerHTML = `
-    <div class="toast-body">
-      <strong class="toast-title"></strong>
-      <span class="toast-text"></span>
-    </div>
+    <span class="toast-icon" aria-hidden="true"></span>
+    <p class="toast-text"></p>
     <button type="button" class="toast-dismiss"></button>
   `;
 
-  toast.querySelector('.toast-title')!.textContent = strings.title;
-  toast.querySelector('.toast-text')!.textContent = strings.body;
+  toast.querySelector('.toast-text')!.textContent = strings.message;
 
   const dismiss = toast.querySelector<HTMLButtonElement>('.toast-dismiss')!;
   dismiss.textContent = '×';
@@ -53,16 +51,19 @@ function buildToast(strings: ToastStrings): HTMLElement {
 }
 
 export function mountSystemLink(): void {
-  const link = document.querySelector<HTMLAnchorElement>('[data-system-link]');
-  if (!link) return;
+  document
+    .querySelectorAll<HTMLAnchorElement>('[data-system-link]')
+    .forEach(upgradeLink);
+}
+
+function upgradeLink(link: HTMLAnchorElement): void {
 
   const textNode = link.querySelector<HTMLElement>('[data-system-link-text]');
   const idleLabel = link.dataset.label ?? link.textContent?.trim() ?? '';
   const checkingLabel = link.dataset.checking ?? idleLabel;
 
   const strings: ToastStrings = {
-    title: link.dataset.toastTitle ?? '',
-    body: link.dataset.toastBody ?? '',
+    message: link.dataset.toastMessage ?? '',
     dismiss: link.dataset.toastDismiss ?? 'Dismiss',
   };
 
@@ -107,8 +108,11 @@ export function mountSystemLink(): void {
     }
 
     // REQ-EVT-04: stay on the page, say so, block nothing.
+    // role="alert" announces it; focus stays on the link the visitor pressed,
+    // so a second attempt is one keypress away.
     const toast = buildToast(strings);
+    toast.hidden = true;
+    void toast.offsetWidth; // restart the entrance when shown again
     toast.hidden = false;
-    toast.querySelector<HTMLButtonElement>('.toast-dismiss')?.focus();
   });
 }
