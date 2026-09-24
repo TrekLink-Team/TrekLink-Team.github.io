@@ -34,8 +34,10 @@ only for general site questions, because an issue publishes the requester's own 
 
 **Radio band**: the Terms keep "MY_433, 433.0 to 435.0 MHz" at the leader's instruction.
 
-**Base branch**: PR #10 moved from `main` to `dev`, per AGENTS.md §3, by rebasing and
-force-pushing the branch.
+**Base branch and PR**: the work was rebuilt on `dev`, per AGENTS.md §3, without the commit that
+tracked `source-photos/`. PR #10 (from `redesign/landing` into `main`) was closed and replaced by
+one PR from `feat/landing-redesign` into `dev`, which also brings the branch name in line with the
+conventions.
 
 ## Findings worth not re-deriving
 
