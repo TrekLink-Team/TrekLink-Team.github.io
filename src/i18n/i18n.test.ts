@@ -62,7 +62,7 @@ describe('catalogue hygiene', () => {
 
   it('never ships a Vietnamese value identical to English prose', () => {
     // Proper nouns, units and board names may legitimately match.
-    const allowed = /^(v\d|\d+|433 MHz|SOS|English|Tiếng Việt|LilyGO.*|Node v\d)$/;
+    const allowed = /^(v\d|\d+|433 MHz|GPL-3.0|SOS|English|Tiếng Việt|LilyGO.*|Node v\d)$/;
     const same = Object.keys(en).filter((k) => {
       const e = (en as Record<string, string>)[k]!;
       const v = (vi as Record<string, string>)[k];
