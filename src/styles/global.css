@@ -428,6 +428,82 @@
     }
   }
 
+  /* --- Scroll progress ---------------------------------------------------- */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 400;
+    height: 3px;
+    background: linear-gradient(90deg, var(--moss), var(--brass));
+    transform-origin: left;
+    transform: scaleX(0);
+    pointer-events: none;
+  }
+  @supports (animation-timeline: scroll()) {
+    .scroll-progress {
+      animation: progress-grow linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+  @keyframes progress-grow {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* --- Back to top ------------------------------------------------------- */
+  /* A plain #top link without JavaScript; the chrome island shows it only
+     once the visitor is a screen down and scrolls smoothly. */
+  .to-top {
+    position: fixed;
+    right: max(var(--gutter), env(safe-area-inset-right));
+    bottom: max(var(--gutter), env(safe-area-inset-bottom));
+    z-index: 250;
+    width: 3rem;
+    height: 3rem;
+    display: grid;
+    place-items: center;
+    color: var(--ink-inverse);
+    background: var(--brass);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-press);
+    transition:
+      transform var(--dur-spring) var(--spring),
+      opacity var(--dur) var(--ease),
+      background-color var(--dur) var(--ease);
+  }
+  .to-top svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .to-top:hover {
+    background: var(--brass-lit);
+    transform: translateY(-3px);
+  }
+  html.js .to-top:not([data-show]) {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.9);
+    pointer-events: none;
+  }
+
+  main:focus {
+    outline: none;
+  }
+
+  /* The brand marks are white line art; in the light theme they print dark. */
+  [data-theme='light'] .wordmark-mark,
+  [data-theme='light'] .lockup {
+    filter: invert(1) brightness(0.35);
+  }
+
   /* Screen-reader-only, for live regions and labels that must exist but not
      be seen. */
   .sr-only {

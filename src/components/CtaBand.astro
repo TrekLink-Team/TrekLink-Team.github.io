@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from '../../site.config';
 import { useTranslations, type Locale } from '../i18n';
+import { withUtm } from '../lib/utm';
 
 interface Props {
   locale: Locale;
@@ -20,7 +21,8 @@ const t = useTranslations(locale);
       <div class="cta-actions above">
         <a
           class="btn btn-primary"
-          href={siteConfig.operationsUrl}
+          href={withUtm(siteConfig.operationsUrl, { campaign: 'home', content: 'cta-open-system' })}
+          data-utm-pass
           data-system-link
           data-label={t('cta.primary')}
           data-checking={t('system.checking')}

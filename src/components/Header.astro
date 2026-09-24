@@ -1,14 +1,22 @@
 ---
 import { siteConfig } from '../../site.config';
 import { useTranslations, localePath, type Locale } from '../i18n';
+import { withUtm } from '../lib/utm';
 
 interface Props {
   locale: Locale;
+  /** The current route below the locale prefix, so the switch keeps the page. */
+  path?: string;
+  /** The UTM campaign for links that leave the site from this page. */
+  campaign?: string;
 }
-const { locale } = Astro.props;
+const { locale, path = '', campaign = 'home' } = Astro.props;
 const t = useTranslations(locale);
 const home = localePath(locale);
 const other: Locale = locale === 'en' ? 'vi' : 'en';
+
+const opsHeader = withUtm(siteConfig.operationsUrl, { campaign, content: 'header-open-system' });
+const opsMenu = withUtm(siteConfig.operationsUrl, { campaign, content: 'menu-open-system' });
 
 const sections = [
   { id: 'problem', label: t('nav.problem') },
@@ -20,7 +28,7 @@ const sections = [
 
 <header class="site-header" data-site-header>
   <div class="header-rail">
-    <a class="wordmark" href={home}>
+    <a class="wordmark" href={home} aria-label="TrekLink">
       {/* The mark alone. The lockup also carries the word, and setting it
           twice beside itself would say the name twice. */}
       <img
@@ -61,7 +69,7 @@ const sections = [
       */}
       <a
         class="lang"
-        href={localePath(other)}
+        href={localePath(other) + path}
         hreflang={other}
         data-lang-switch={other}
         aria-label={`${t('lang.label')}: ${other === 'vi' ? t('lang.vi') : t('lang.en')}`}
@@ -75,9 +83,29 @@ const sections = [
         the right fallback (REQ-ERR-05). The island upgrades it to a checked
         link on activation.
       */}
+      <button
+        class="theme-toggle"
+        type="button"
+        data-theme-toggle
+        data-to-light={t('theme.toLight')}
+        data-to-dark={t('theme.toDark')}
+        aria-label={t('theme.toLight')}
+        aria-pressed="false"
+        hidden
+      >
+        <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.5"></circle>
+          <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"></path>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"></path>
+        </svg>
+      </button>
+
       <a
         class="btn btn-primary system-link"
-        href={siteConfig.operationsUrl}
+        href={opsHeader}
+        data-utm-pass
         data-system-link
         data-label={t('system.link')}
         data-checking={t('system.checking')}
@@ -119,7 +147,8 @@ const sections = [
     <div class="mobile-system">
       <a
         class="btn btn-primary"
-        href={siteConfig.operationsUrl}
+        href={opsMenu}
+        data-utm-pass
         data-system-link
         data-label={t('system.link')}
         data-checking={t('system.checking')}
@@ -209,6 +238,7 @@ const sections = [
   .capsule a {
     position: relative;
     display: block;
+    white-space: nowrap;
     padding: 0.7rem 0.9rem;
     border-radius: var(--radius-sm);
     font-size: 0.8rem;
@@ -272,8 +302,49 @@ const sections = [
     border-color: var(--moss);
   }
 
+  .theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--ink-muted);
+    background: transparent;
+    border: 1px solid var(--surface-ridge);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition:
+      color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+  .theme-toggle[hidden] {
+    display: none;
+  }
+  .theme-toggle:hover {
+    color: var(--brass);
+    border-color: var(--brass);
+  }
+  .theme-toggle svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    transition: transform var(--dur-spring) var(--spring);
+  }
+  .theme-toggle:hover svg {
+    transform: rotate(-20deg) scale(1.08);
+  }
+  /* Shows where a click takes you: the sun in the dark theme, the moon in the light. */
+  .icon-moon,
+  :global([data-theme='light']) .icon-sun {
+    display: none;
+  }
+  :global([data-theme='light']) .icon-moon {
+    display: block;
+  }
+
   .system-link {
     position: relative;
+    white-space: nowrap;
     min-height: 2.75rem;
     padding-block: 0.6rem;
     box-shadow: 0 4px 0 var(--brass-deep);
@@ -364,7 +435,8 @@ const sections = [
     display: inline-block;
   }
 
-  @media (max-width: 959px) {
+  /* Phone and tablet share the disclosure menu; the inline nav starts at 1100px. */
+  @media (max-width: 1099px) {
     .capsule {
       display: none;
     }
@@ -372,12 +444,17 @@ const sections = [
       display: grid;
     }
   }
-  @media (max-width: 599px) {
+  @media (max-width: 1099px) {
     .system-link {
       display: none;
     }
   }
-  @media (max-width: 339px) {
+  @media (min-width: 1100px) {
+    .mobile-nav {
+      display: none;
+    }
+  }
+  @media (max-width: 479px) {
     .wordmark span:last-child {
       display: none;
     }

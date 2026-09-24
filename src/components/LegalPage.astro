@@ -1,0 +1,191 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import { useTranslations, localePath, type Locale } from '../i18n';
+import { privacy, terms, type LegalDoc } from '../content/legal';
+
+interface Props {
+  locale: Locale;
+  kind: 'privacy' | 'terms';
+}
+const { locale, kind } = Astro.props;
+const t = useTranslations(locale);
+const doc: LegalDoc = (kind === 'privacy' ? privacy : terms)[locale];
+const title = t(kind === 'privacy' ? 'privacy.title' : 'terms.title');
+const meta = t(kind === 'privacy' ? 'privacy.meta' : 'terms.meta');
+const path = `${kind}/`;
+
+/* Split a sentence into text and URL parts, so addresses become links. */
+const parts = (s: string) =>
+  s.split(/(https:\/\/[^\s,)]+[^\s,).])/g).map((p) => ({ url: p.startsWith('https://'), p }));
+
+const date = new Date(doc.updated + 'T00:00:00Z').toLocaleDateString(
+  locale === 'vi' ? 'vi-VN' : 'en-GB',
+  { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' },
+);
+---
+
+<Base locale={locale} path={path} title={`${title} · TrekLink`} description={meta}>
+  <Header locale={locale} path={path} campaign={kind} />
+  <main id="main" tabindex="-1" class="legal grain contours">
+    <div class="shell above legal-grid">
+      <aside class="toc" aria-labelledby="toc-h">
+        <p class="eyebrow" id="toc-h">{t('legal.toc')}</p>
+        <ol>
+          {doc.sections.map((s) => (
+            <li>
+              <a href={`#${s.id}`}>{s.heading}</a>
+            </li>
+          ))}
+        </ol>
+      </aside>
+
+      <article class="doc">
+        <header class="doc-head">
+          <a class="back" href={localePath(locale)}>← {t('legal.back')}</a>
+          <h1>{title}</h1>
+          <p class="chip">
+            {t('legal.updated')}: <b><time datetime={doc.updated}>{date}</time></b>
+          </p>
+          <p class="lede">{doc.intro}</p>
+        </header>
+
+        {doc.sections.map((s, i) => (
+          <section id={s.id} class="doc-section glass" aria-labelledby={`${s.id}-h`}>
+            <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h2 id={`${s.id}-h`}>{s.heading}</h2>
+            {s.body.map((b) => (
+              <p>
+                {parts(b).map((x) => (x.url ? <a href={x.p} rel="noopener noreferrer">{x.p}</a> : x.p))}
+              </p>
+            ))}
+            {s.list && (
+              <ul>
+                {s.list.map((b) => (
+                  <li>
+                    {parts(b).map((x) => (x.url ? <a href={x.p} rel="noopener noreferrer">{x.p}</a> : x.p))}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))}
+      </article>
+    </div>
+  </main>
+  <Footer locale={locale} campaign={kind} />
+</Base>
+
+<style>
+  .legal {
+    position: relative;
+    padding-block: clamp(2.5rem, 2rem + 3vw, 5rem) var(--section-y);
+  }
+  .legal-grid {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: clamp(1.5rem, 1rem + 3vw, 4rem);
+    align-items: start;
+  }
+  .toc {
+    position: sticky;
+    top: 6rem;
+    display: grid;
+    gap: 0.8rem;
+  }
+  .toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.15rem;
+    border-left: 2px solid var(--surface-ridge);
+  }
+  .toc a {
+    display: block;
+    padding: 0.45rem 0.8rem;
+    margin-left: -2px;
+    border-left: 2px solid transparent;
+    color: var(--ink-muted);
+    text-decoration: none;
+    font-size: var(--step--1);
+    font-weight: 600;
+    transition:
+      color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+  .toc a:hover {
+    color: var(--ink);
+    border-left-color: var(--brass);
+  }
+
+  .doc {
+    display: grid;
+    gap: 1rem;
+    max-width: 48rem;
+  }
+  .doc-head {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+    margin-bottom: 1rem;
+  }
+  .back {
+    color: var(--moss);
+    font-weight: 700;
+    font-size: var(--step--1);
+    text-decoration: none;
+  }
+  .back:hover {
+    text-decoration: underline;
+  }
+  h1 {
+    font-size: var(--step-4);
+  }
+  .doc-section {
+    position: relative;
+    display: grid;
+    gap: 0.7rem;
+    padding: clamp(1.2rem, 1rem + 1vw, 1.8rem);
+    scroll-margin-top: 6rem;
+  }
+  .num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--brass);
+    font-size: var(--step-1);
+    line-height: 1;
+  }
+  .doc-section h2 {
+    font-size: var(--step-2);
+  }
+  .doc-section p,
+  .doc-section li {
+    color: var(--ink-muted);
+    line-height: 1.65;
+    max-width: 64ch;
+  }
+  .doc-section ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+  .doc-section a {
+    color: var(--moss);
+    overflow-wrap: anywhere;
+  }
+  .doc-section a:hover {
+    color: var(--brass);
+  }
+
+  @media (max-width: 899px) {
+    .legal-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .toc {
+      display: none;
+    }
+  }
+</style>

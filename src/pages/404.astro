@@ -2,44 +2,122 @@
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { useTranslations } from '../i18n';
+import { t } from '../i18n';
 
 /*
- * A genuine not-found page (task 5.4). It is NOT the `404.html` redirect
- * trick: that pattern serves a real page under a 404 status, which damages
- * indexing and is exactly what REQ-UBI-03 rules out. Every canonical route on
- * this site is a real file, so nothing needs rescuing here.
+ * GitHub Pages serves one 404.html for every missing path, in either locale,
+ * so this page speaks both languages at once rather than guessing. It is a
+ * real not-found response (REQ-UBI-03), never a redirect.
  */
-const locale = 'en' as const;
-const t = useTranslations(locale);
+const en = (k: Parameters<typeof t>[1]) => t('en', k);
+const vi = (k: Parameters<typeof t>[1]) => t('vi', k);
 ---
 
-<Base locale={locale} title={`${t('notfound.title')}: TrekLink`} noindex>
-  <Header locale={locale} />
-  <main id="main" class="notfound">
-    <div class="shell">
-      <p class="eyebrow">404</p>
-      <h1>{t('notfound.heading')}</h1>
-      <p class="lede">{t('notfound.body')}</p>
-      <a class="btn btn-primary" href="/">{t('notfound.cta')}</a>
+<Base
+  locale="en"
+  path="404/"
+  title={`${en('notfound.title')} · ${vi('notfound.title')} · TrekLink`}
+  description={en('notfound.meta')}
+  noindex
+  alternates={false}
+>
+  <Header locale="en" campaign="404" />
+  <main id="main" tabindex="-1" class="nf grain contours">
+    <div class="glow glow-brass nf-glow" aria-hidden="true"></div>
+    <div class="shell above nf-grid">
+      <p class="nf-code" aria-hidden="true">404</p>
+
+      <div class="nf-copy">
+        <p class="eyebrow">{en('notfound.code')}</p>
+        <h1>{en('notfound.heading')}</h1>
+        <p class="lede">{en('notfound.body')}</p>
+        <div class="nf-actions">
+          <a class="btn btn-primary" href="/">{en('notfound.cta')} <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn btn-ghost" href="/#nodes">{en('notfound.nodes')}</a>
+        </div>
+      </div>
+
+      <div class="nf-copy nf-vi glass" lang="vi">
+        <h2>{vi('notfound.heading')}</h2>
+        <p>{vi('notfound.body')}</p>
+        <div class="nf-actions">
+          <a class="btn btn-primary" href="/vi/">{vi('notfound.cta')}</a>
+          <a class="btn btn-ghost" href="/vi/#nodes">{vi('notfound.nodes')}</a>
+        </div>
+      </div>
     </div>
   </main>
-  <Footer locale={locale} />
+  <Footer locale="en" campaign="404" />
 </Base>
 
 <style>
-  .notfound {
-    display: grid;
-    align-content: center;
-    min-height: 60vh;
-    padding-block: var(--section-y);
+  .nf {
+    position: relative;
+    overflow: clip;
+    min-height: 70vh;
+    padding-block: clamp(3rem, 2rem + 5vw, 7rem);
   }
-  .notfound .shell {
+  .nf-glow {
+    width: 50rem;
+    height: 40rem;
+    right: -12rem;
+    top: -10rem;
+  }
+  .nf-grid {
     display: grid;
-    gap: 1.2rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem 3rem;
+    align-items: end;
+  }
+  /* The numeral as a shape: brass outline, clipped by the section edge. */
+  .nf-code {
+    grid-column: 1 / -1;
+    margin: 0 0 -0.12em;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(7rem, 4rem + 18vw, 18rem);
+    line-height: 0.8;
+    letter-spacing: -0.02em;
+    color: transparent;
+    -webkit-text-stroke: 2px var(--brass);
+  }
+  .nf-copy {
+    display: grid;
+    gap: 1rem;
     justify-items: start;
   }
-  h1 {
+  .nf-copy h1 {
     font-size: var(--step-3);
+  }
+  .nf-vi {
+    padding: clamp(1.2rem, 1rem + 1vw, 1.8rem);
+  }
+  .nf-vi h2 {
+    font-size: var(--step-2);
+  }
+  .nf-vi p {
+    color: var(--ink-muted);
+  }
+  .nf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-code {
+      animation: nf-in 1100ms var(--ease-out) both;
+    }
+  }
+  @keyframes nf-in {
+    from {
+      opacity: 0;
+      transform: translateY(2rem);
+      letter-spacing: 0.1em;
+    }
+  }
+  @media (max-width: 799px) {
+    .nf-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 </style>
