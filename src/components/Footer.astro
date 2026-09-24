@@ -1,10 +1,14 @@
 ---
-import { useTranslations, type Locale } from '../i18n';
+import { useTranslations, localePath, type Locale } from '../i18n';
+import { withUtm } from '../lib/utm';
 
 interface Props {
   locale: Locale;
+  /** The UTM campaign for links that leave the site from this page. */
+  campaign?: string;
 }
-const { locale } = Astro.props;
+const { locale, campaign = 'home' } = Astro.props;
+const home = localePath(locale);
 const t = useTranslations(locale);
 const year = new Date().getFullYear();
 
@@ -14,11 +18,18 @@ const year = new Date().getFullYear();
  * personal information, so it stays.
  */
 const links = [
-  { href: 'https://github.com/TrekLink-Team', label: t('footer.repo') },
   {
-    href: 'https://github.com/TrekLink-Team/treklink-docs',
+    href: withUtm('https://github.com/TrekLink-Team', { campaign, content: 'footer-repo' }),
+    label: t('footer.repo'),
+  },
+  {
+    href: withUtm('https://github.com/TrekLink-Team/treklink-docs', { campaign, content: 'footer-docs' }),
     label: t('footer.docs'),
   },
+];
+const legal = [
+  { href: `${home}privacy/`, label: t('footer.privacy') },
+  { href: `${home}terms/`, label: t('footer.terms') },
 ];
 ---
 
@@ -37,23 +48,37 @@ const links = [
       <p class="tagline">{t('footer.tagline')}</p>
     </div>
 
-    <nav class="links" aria-label={t('footer.heading')}>
-      <ul>
-        {
-          links.map((l) => (
-            <li>
-              <a href={l.href} rel="noopener noreferrer">
-                {l.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
+    <div class="cols">
+      <nav class="links" aria-label={t('footer.heading')}>
+        <ul>
+          {
+            links.map((l) => (
+              <li>
+                <a href={l.href} rel="noopener noreferrer">
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <nav class="links" aria-label={t('footer.legal')}>
+        <ul>
+          {
+            legal.map((l) => (
+              <li>
+                <a href={l.href}>{l.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
   </div>
 
   <div class="shell rule">
     <p class="rights">&copy; {year} {t('footer.rights')}</p>
+    <a class="top-link" href="#top">{t('top.label')} ↑</a>
   </div>
 </footer>
 
@@ -103,10 +128,28 @@ const links = [
     border-bottom-color: var(--moss-deep);
   }
 
+  .cols {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 3rem;
+  }
   .rule {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
     margin-top: 2.2rem;
     padding-top: 1.2rem;
     border-top: 1px solid var(--surface-ridge);
+  }
+  .top-link {
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .top-link:hover {
+    color: var(--brass);
   }
   .rights {
     color: var(--ink-faint);

@@ -17,7 +17,7 @@ export function mountCarousel(): void {
   if (!root) return;
 
   const track = root.querySelector<HTMLElement>('[data-carousel-track]');
-  const controls = root.querySelector<HTMLElement>('[data-carousel-controls]');
+  const controls = Array.from(root.querySelectorAll<HTMLElement>('[data-carousel-controls]'));
   const prev = root.querySelector<HTMLButtonElement>('[data-carousel-prev]');
   const next = root.querySelector<HTMLButtonElement>('[data-carousel-next]');
   const status = root.querySelector<HTMLElement>('[data-carousel-status]');
@@ -27,7 +27,7 @@ export function mountCarousel(): void {
   const items = Array.from(
     root.querySelectorAll<HTMLElement>('[data-carousel-item]'),
   );
-  if (!track || !controls || !prev || !next || items.length < 2) return;
+  if (!track || !controls.length || !prev || !next || items.length < 2) return;
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   let index = -1;
@@ -36,19 +36,19 @@ export function mountCarousel(): void {
   /** True when the cards overflow the track, so paging does something. */
   const isPaged = () => track.scrollWidth - track.clientWidth > 4;
 
-  /** The scroll-snap start edge, i.e. the track's own left padding. */
-  const snapInset = () => parseFloat(getComputedStyle(track).scrollPaddingLeft) || 0;
+  /** Where the track sits when this card is snapped to the centre. */
+  const snapOf = (item: HTMLElement) =>
+    item.offsetLeft + item.offsetWidth / 2 - track.clientWidth / 2;
 
   /** The card whose snap point is nearest the current scroll position. */
   function nearest(): number {
     const left = track!.scrollLeft;
-    const inset = snapInset();
     // At the far end the last card may be unable to reach its own snap point.
     if (left >= track!.scrollWidth - track!.clientWidth - 2) return items.length - 1;
     let best = 0;
     let bestDistance = Infinity;
     items.forEach((item, i) => {
-      const distance = Math.abs(item.offsetLeft - inset - left);
+      const distance = Math.abs(snapOf(item) - left);
       if (distance < bestDistance) {
         bestDistance = distance;
         best = i;
@@ -78,7 +78,7 @@ export function mountCarousel(): void {
     const target = items[Math.max(0, Math.min(items.length - 1, i))];
     if (!target) return;
     track!.scrollTo({
-      left: target.offsetLeft - snapInset(),
+      left: snapOf(target),
       behavior: reduced.matches ? 'auto' : 'smooth',
     });
   }
@@ -91,8 +91,7 @@ export function mountCarousel(): void {
   function step(dir: 1 | -1): void {
     const left = track!.scrollLeft;
     const max = track!.scrollWidth - track!.clientWidth;
-    const inset = snapInset();
-    const snaps = items.map((item) => Math.min(max, Math.max(0, item.offsetLeft - inset)));
+    const snaps = items.map((item) => Math.min(max, Math.max(0, snapOf(item))));
     const target =
       dir > 0
         ? snaps.findIndex((x) => x > left + 2)
@@ -123,7 +122,7 @@ export function mountCarousel(): void {
 
   function sync(): void {
     const paged = isPaged();
-    controls!.hidden = !paged;
+    controls.forEach((c) => (c.hidden = !paged));
     root!.toggleAttribute('data-paged', paged);
     index = -1;
     paint(paged ? nearest() : 0, false);

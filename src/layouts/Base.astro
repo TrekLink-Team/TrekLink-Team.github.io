@@ -5,56 +5,75 @@ import { useTranslations, localePath, LOCALES, type Locale } from '../i18n';
 
 interface Props {
   locale: Locale;
-  /** Overrides the catalogue title. Used by the not-found page. */
+  /** The route below the locale prefix, e.g. 'privacy/'. Empty for home. */
+  path?: string;
+  /** A unique title for this page. Falls back to the home title. */
   title?: string;
+  /** A unique description for this page. */
+  description?: string;
   /** Omit the page from search indexes. */
   noindex?: boolean;
+  /** Emit hreflang alternates. Off for the single bilingual 404. */
+  alternates?: boolean;
 }
 
-const { locale, title, noindex = false } = Astro.props;
+const {
+  locale,
+  path = '',
+  title,
+  description,
+  noindex = false,
+  alternates = true,
+} = Astro.props;
 const t = useTranslations(locale);
 
 const pageTitle = title ?? t('meta.title');
-const canonical = new URL(localePath(locale), siteConfig.site).href;
+const pageDescription = description ?? t('meta.description');
+const url = (l: Locale) => new URL(localePath(l) + path, siteConfig.site).href;
+const canonical = url(locale);
 ---
 
 <!doctype html>
-<html lang={locale}>
+<html lang={locale} data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
-    <meta name="description" content={t('meta.description')} />
+    <meta name="description" content={pageDescription} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
 
-    {/* Every locale is a real route, so each declares the others. */}
     {
-      LOCALES.map((l) => (
-        <link
-          rel="alternate"
-          hreflang={l}
-          href={new URL(localePath(l), siteConfig.site).href}
-        />
-      ))
+      alternates && (
+        <>
+          {LOCALES.map((l) => (
+            <link rel="alternate" hreflang={l} href={url(l)} />
+          ))}
+          <link rel="alternate" hreflang="x-default" href={url('en')} />
+        </>
+      )
     }
-    <link
-      rel="alternate"
-      hreflang="x-default"
-      href={new URL('/', siteConfig.site).href}
-    />
 
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TrekLink" />
     <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={t('meta.description')} />
+    <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary_large_image" />
 
     {/*
-      Self-hosted, so no third-party font request is on the critical path.
-      Only the two latin faces are preloaded: the Vietnamese subsets are
-      fetched by unicode-range only when a page actually needs them.
+      The saved theme is applied before first paint so a light-theme visitor
+      never sees a dark flash. Dark is the brand default. Inline and tiny on
+      purpose; everything else is an island.
     */}
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      try {
+        var saved = localStorage.getItem('treklink.theme');
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch (e) {}
+    </script>
+
     <link
       rel="preload"
       href="/fonts/oswald-latin-wght-normal.woff2"
@@ -74,27 +93,6 @@ const canonical = new URL(localePath(locale), siteConfig.site).href;
     <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
     <link rel="apple-touch-icon" href="/favicon.png" />
 
-    {/*
-      Cookieless, so no consent banner is required (REQ-UBI-08). Rendered only
-      once a token exists, so an unset token emits no tag at all rather than a
-      tag carrying a placeholder.
-
-      `type="module"` and `is:inline` together reproduce Cloudflare's own
-      snippet exactly. A module script defers by default, and `is:inline`
-      stops Astro from taking the tag into its own bundling pipeline, which
-      would rewrite the URL that Cloudflare matches the beacon against.
-
-      Nothing on the page reads anything this script defines, so a blocked,
-      failed or ad-blocked beacon changes nothing a visitor can see
-      (REQ-ERR-04).
-
-      No `integrity` attribute: Cloudflare publishes this beacon at a stable
-      unversioned URL and rolls its contents, so a pinned hash would silently
-      disable analytics at their next release rather than protect anything.
-      The residual risk is a compromised Cloudflare CDN, and it is bounded
-      here because this site holds no credentials, no forms and no payment
-      path, which GitHub Pages' terms forbid it from holding in any case.
-    */}
     {
       siteConfig.analyticsToken && (
         <script
@@ -108,7 +106,57 @@ const canonical = new URL(localePath(locale), siteConfig.site).href;
   </head>
 
   <body>
+    <div class="scroll-progress" data-scroll-progress aria-hidden="true"></div>
     <a class="skip-link" href="#main">{t('skip.toContent')}</a>
     <slot />
+    <a class="to-top" href="#top" data-to-top aria-label={t('top.label')}>
+      <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
+        <path d="M10 15V5M5 10l5-5 5 5"></path>
+      </svg>
+    </a>
+
+    {/*
+      Every island upgrades markup that already works, and each mounts on its
+      own so one failure cannot take the rest down (REQ-ERR-05).
+    */}
+    <script>
+      import { mountSystemLink } from '../islands/system-link';
+      import { mountCarousel } from '../islands/carousel';
+      import { mountScrollspy } from '../islands/scrollspy';
+      import { mountHeaderScroll } from '../islands/header-scroll';
+      import { mountReveal } from '../islands/reveal';
+      import { mountMeshMap } from '../islands/mesh-map';
+      import {
+        mountThemeToggle,
+        mountScrollProgress,
+        mountBackToTop,
+        mountUtmPassThrough,
+      } from '../islands/chrome';
+      import {
+        mountLanguageSwitcher,
+        mountMobileNav,
+      } from '../islands/language-switcher';
+
+      for (const mount of [
+        mountThemeToggle,
+        mountUtmPassThrough,
+        mountReveal,
+        mountHeaderScroll,
+        mountScrollProgress,
+        mountBackToTop,
+        mountSystemLink,
+        mountCarousel,
+        mountMeshMap,
+        mountScrollspy,
+        mountLanguageSwitcher,
+        mountMobileNav,
+      ]) {
+        try {
+          mount();
+        } catch (error) {
+          console.error('[island] failed to mount', error);
+        }
+      }
+    </script>
   </body>
 </html>

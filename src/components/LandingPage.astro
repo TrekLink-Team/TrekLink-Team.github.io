@@ -24,7 +24,7 @@ const { locale } = Astro.props;
 
 <Base locale={locale}>
   <Header locale={locale} />
-  <main id="main">
+  <main id="main" tabindex="-1">
     <Hero locale={locale} />
     <Problem locale={locale} />
     <HowItWorks locale={locale} />
@@ -35,39 +35,3 @@ const { locale } = Astro.props;
   </main>
   <Footer locale={locale} />
 </Base>
-
-{/*
-  The islands, each mounted independently so that a failure in one cannot
-  take the others down. Every one of them upgrades markup that already works,
-  which is what keeps REQ-ERR-05 true.
-*/}
-<script>
-  import { mountSystemLink } from '../islands/system-link';
-  import { mountCarousel } from '../islands/carousel';
-  import { mountScrollspy } from '../islands/scrollspy';
-  import { mountHeaderScroll } from '../islands/header-scroll';
-  import { mountReveal } from '../islands/reveal';
-  import {
-    mountLanguageSwitcher,
-    mountMobileNav,
-  } from '../islands/language-switcher';
-
-  for (const mount of [
-    mountReveal,
-    mountHeaderScroll,
-    mountSystemLink,
-    mountCarousel,
-    mountScrollspy,
-    mountLanguageSwitcher,
-    mountMobileNav,
-  ]) {
-    try {
-      mount();
-    } catch (error) {
-      // One broken island must not stop the rest from mounting. The page is
-      // fully readable without any of them, so this is logged and dropped
-      // rather than surfaced to the visitor (REQ-ERR-01).
-      console.error('[island] failed to mount', error);
-    }
-  }
-</script>

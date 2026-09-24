@@ -1,5 +1,6 @@
 ---
 import { useTranslations, type Locale, type TranslationKey } from '../i18n';
+import { W, H, buildMesh, buildMap, hops } from '../lib/meshmap';
 
 interface Props {
   locale: Locale;
@@ -13,15 +14,30 @@ const steps = (['a', 'b', 'c'] as const).map((k, i) => ({
   body: t(`how.${k}.body` as TranslationKey),
 }));
 
-/* The route: carrier, two relaying handsets, basecamp. */
-const PATH = 'M60 190 L230 90 L400 170 L570 70 L720 150';
-const nodes = [
-  { x: 60, y: 190, label: t('how.node.carrier'), kind: 'sos' },
-  { x: 230, y: 90, label: t('how.node.handset'), kind: 'hop' },
-  { x: 400, y: 170, label: t('how.node.handset'), kind: 'hop' },
-  { x: 570, y: 70, label: t('how.node.handset'), kind: 'hop' },
-  { x: 720, y: 150, label: t('how.node.basecamp'), kind: 'base' },
-];
+const { nodes, edges } = buildMesh();
+const map = buildMap();
+
+/*
+ * Without JavaScript the wave always starts at the left-most trekker. The
+ * mesh-map island picks a new origin for every wave. Each element carries its
+ * hop count as --hop, so CSS alone times the ripple.
+ */
+const origin = nodes
+  .filter((n) => n.kind === 'trekker')
+  .reduce((a, b) => (b.x < a.x ? b : a)).id;
+const hop = hops(nodes.length, edges, origin);
+const maxHop = Math.max(...hop);
+const station = nodes.find((n) => n.kind === 'station')!;
+const guide = nodes.find((n) => n.kind === 'guide')!;
+const o = nodes[origin]!;
+
+/* Each edge is drawn from its nearer end to its farther end, so the dash
+   travels outward from the origin. */
+const edgeView = edges.map((e) => {
+  const [from, to] = hop[e.a]! <= hop[e.b]! ? [e.a, e.b] : [e.b, e.a];
+  return { from, to, hop: hop[from]!, same: hop[from] === hop[to] };
+});
+const adjacency = JSON.stringify(edges.map((e) => [e.a, e.b]));
 ---
 
 <section class="section how grain" id="how" aria-labelledby="how-heading">
@@ -32,30 +48,92 @@ const nodes = [
       <h2 id="how-heading">{t('how.heading')}</h2>
     </header>
 
-    <div class="route glass" data-reveal data-loop>
+    <figure class="route glass" data-reveal>
       <span class="chip route-proof"><b>{t('proof.towers.value')}</b> {t('how.proof')}</span>
       <svg
-        viewBox="0 0 780 250"
+        class="mesh run"
+        viewBox={`0 0 ${W} ${H}`}
         role="img"
         aria-label={t('how.diagram.label')}
         preserveAspectRatio="xMidYMid meet"
+        data-mesh
+        data-edges={adjacency}
+        data-origin={origin}
+        style={`--max-hop:${maxHop}`}
       >
-        <path class="route-line" d={PATH}></path>
-        <path class="route-trail" d={PATH} pathLength="1"></path>
-        {
-          nodes.map((n) => (
-            <g class={`node node-${n.kind}`}>
-              <circle class="node-halo" cx={n.x} cy={n.y} r="26" />
-              <circle class="node-core" cx={n.x} cy={n.y} r="8" />
-              <text x={n.x} y={n.y + 48} text-anchor="middle">
-                {n.label}
-              </text>
-            </g>
-          ))
-        }
-        <circle class="packet" r="7" style={`offset-path: path('${PATH}')`}></circle>
+        {/* Terrain, generated at build time from a fixed seed. */}
+        <g class="map" aria-hidden="true">
+          <rect class="map-ground" x="-100" y="-100" width={W + 200} height={H + 200}></rect>
+          <g class="map-drift">
+            {map.contours.map((d) => <path class="map-contour" d={d} />)}
+            <path class="map-water" d={map.lakePath} />
+            <path class="map-river-bank" d={map.riverPath} />
+            <path class="map-river" d={map.riverPath} />
+            <path class="map-river-flow" d={map.riverPath} />
+            {map.minor.map((d) => <path class="map-road" d={d} />)}
+            {map.major.map((d) => <path class="map-road-major" d={d} />)}
+            {map.blocks.map((b) => <rect class="map-block" x={b.x} y={b.y} width={b.w} height={b.h} />)}
+          </g>
+        </g>
+
+        {/* The droplet: rings that spread from the origin across the map. */}
+        <g class="droplet" data-droplet style={`transform: translate(${o.x}px, ${o.y}px)`}>
+          <circle r="60" style="--k:0" data-droplet-ring></circle>
+          <circle r="60" style="--k:1"></circle>
+          <circle r="60" style="--k:2"></circle>
+        </g>
+
+        <g class="links">
+          {
+            edgeView.map((e) => (
+              <g class:list={['link', { same: e.same }]} style={`--hop:${e.hop}`} data-a={e.from} data-b={e.to}>
+                <line class="link-base" x1={nodes[e.from]!.x} y1={nodes[e.from]!.y} x2={nodes[e.to]!.x} y2={nodes[e.to]!.y} />
+                <line class="link-pulse" pathLength="1" x1={nodes[e.from]!.x} y1={nodes[e.from]!.y} x2={nodes[e.to]!.x} y2={nodes[e.to]!.y} />
+              </g>
+            ))
+          }
+        </g>
+
+        <g class="nodes">
+          {
+            nodes.map((n) => (
+              <g
+                class:list={['node', `node-${n.kind}`, { origin: n.id === origin }]}
+                style={`--hop:${hop[n.id]}; transform: translate(${n.x}px, ${n.y}px)`}
+                data-node={n.id}
+              >
+                <circle class="node-ring" r="14" />
+                {n.kind === 'station' ? (
+                  <>
+                    <rect class="node-core" x="-13" y="-13" width="26" height="26" rx="3" />
+                    <path class="station-mast" d="M0 -6v12M-5 -1l5-5 5 5" />
+                  </>
+                ) : n.kind === 'guide' ? (
+                  <>
+                    <circle class="node-halo" r="15" />
+                    <circle class="node-core" r="9" />
+                  </>
+                ) : (
+                  <circle class="node-core" r="8" />
+                )}
+              </g>
+            ))
+          }
+        </g>
+
+        <g class="labels" aria-hidden="true">
+          <text x={guide.x} y={guide.y + 40} text-anchor="middle">{t('how.legend.guide')}</text>
+          <text x={station.x - 22} y={station.y + 44} text-anchor="end">{t('how.legend.station')}</text>
+        </g>
       </svg>
-    </div>
+
+      <figcaption class="legend">
+        <span><i class="key key-origin" aria-hidden="true"></i>{t('how.legend.origin')}</span>
+        <span><i class="key key-trekker" aria-hidden="true"></i>{t('how.legend.trekker')}</span>
+        <span><i class="key key-guide" aria-hidden="true"></i>{t('how.legend.guide')}</span>
+        <span><i class="key key-station" aria-hidden="true"></i>{t('how.legend.station')}</span>
+      </figcaption>
+    </figure>
 
     <ol class="steps">
       {
@@ -86,67 +164,282 @@ const nodes = [
   }
 
   .route {
-    margin-top: clamp(2rem, 1.4rem + 2.6vw, 3.2rem);
-    padding: clamp(1rem, 0.6rem + 2vw, 2rem);
+    margin: clamp(2rem, 1.4rem + 2.6vw, 3.2rem) 0 0;
+    padding: 0;
     position: relative;
+    overflow: hidden;
   }
   .route-proof {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    z-index: 1;
+    top: 0.9rem;
+    right: 0.9rem;
+    z-index: 2;
+    background: var(--glass-dense);
   }
-  .route svg {
+
+  .mesh {
     display: block;
     width: 100%;
+    aspect-ratio: 1000 / 560;
     height: auto;
-    overflow: visible;
+    --step: 0.38s;
+    --cycle: 6s;
   }
-  .route-line {
+
+  /* --- Map layer ------------------------------------------------------- */
+  .map-ground {
+    fill: var(--map-ground);
+  }
+  .map-contour {
     fill: none;
-    stroke: var(--moss-deep);
+    stroke: var(--map-contour);
+    stroke-width: 1.2;
+  }
+  .map-water {
+    fill: var(--map-water);
+    stroke: var(--map-water-edge);
+    stroke-width: 1.5;
+  }
+  .map-river-bank {
+    fill: none;
+    stroke: var(--map-water-edge);
+    stroke-width: 20;
+    stroke-linecap: round;
+  }
+  .map-river {
+    fill: none;
+    stroke: var(--map-water);
+    stroke-width: 17;
+    stroke-linecap: round;
+  }
+  .map-river-flow {
+    fill: none;
+    stroke: var(--map-water-edge);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 14;
+  }
+  .map-road {
+    fill: none;
+    stroke: var(--map-road);
     stroke-width: 2;
-    stroke-dasharray: 6 9;
+    stroke-linecap: round;
+    stroke-dasharray: 7 6;
   }
-  .route-trail {
+  .map-road-major {
     fill: none;
-    stroke: var(--brass);
+    stroke: var(--map-road-major);
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+  .map-block {
+    fill: var(--map-block);
+    stroke: var(--map-road);
+    stroke-width: 1;
+  }
+
+  /* --- Mesh ------------------------------------------------------------ */
+  .link-base {
+    stroke: var(--mesh-edge);
+    stroke-width: 1.6;
+  }
+  .link-pulse {
+    stroke: var(--brass-lit);
     stroke-width: 3;
     stroke-linecap: round;
-    stroke-linejoin: round;
     stroke-dasharray: 1;
-    stroke-dashoffset: 0;
+    stroke-dashoffset: 1;
+    opacity: 0;
   }
-  .node-halo {
-    fill: var(--surface-base);
-    stroke: var(--moss);
-    stroke-width: 2;
+  .node {
+    transform-box: view-box;
   }
   .node-core {
     fill: var(--moss);
+    stroke: var(--map-ground);
+    stroke-width: 3;
+    transform-box: fill-box;
+    transform-origin: center;
   }
-  .node-sos .node-halo {
-    stroke: var(--brass);
+  .node-ring {
+    fill: none;
+    stroke: var(--brass-lit);
+    stroke-width: 2;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
   }
-  .node-sos .node-core,
-  .node-base .node-core {
+  .node-guide .node-core {
     fill: var(--brass);
   }
-  .node-base .node-halo {
+  .node-guide .node-halo {
+    fill: none;
+    stroke: var(--brass);
+    stroke-width: 2.5;
+  }
+  .node-station .node-core {
+    fill: var(--surface-raised);
     stroke: var(--brass);
     stroke-width: 3;
   }
-  .node text {
-    fill: var(--ink-muted);
-    font: 700 13px var(--font-body);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+  .station-mast {
+    fill: none;
+    stroke: var(--brass);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
-  .packet {
+  .origin .node-core {
     fill: var(--brass-lit);
-    offset-distance: 100%;
-    offset-rotate: 0deg;
-    filter: drop-shadow(0 0 6px var(--brass-glow));
+  }
+  .droplet circle {
+    fill: none;
+    stroke: var(--brass);
+    stroke-width: 2;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .labels text {
+    fill: var(--ink);
+    font: 700 17px var(--font-body);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    paint-order: stroke;
+    stroke: var(--map-ground);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    padding: 0.9rem 1.1rem;
+    border-top: 1px solid var(--glass-edge);
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .key {
+    display: inline-block;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    background: var(--moss);
+  }
+  .key-origin {
+    background: var(--brass-lit);
+    box-shadow: 0 0 0 3px var(--brass-tint-strong);
+  }
+  .key-guide {
+    background: var(--brass);
+    box-shadow: 0 0 0 2px var(--surface-base), 0 0 0 4px var(--brass);
+  }
+  .key-station {
+    border-radius: 2px;
+    background: var(--surface-raised);
+    border: 2px solid var(--brass);
+  }
+
+  /*
+   * The wave. Every element runs the same cycle, offset by its hop count, so
+   * the pulse leaves the origin, crosses each link and lights each node in
+   * turn, like a droplet spreading across water. Reduced motion: a still map
+   * with the mesh drawn and nothing moving.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .mesh.run .node-core {
+      animation: node-hit var(--cycle) var(--ease-out) infinite;
+      animation-delay: calc(var(--hop) * var(--step) + 0.25s);
+    }
+    .mesh.run .node-ring {
+      animation: node-ring var(--cycle) var(--ease-out) infinite;
+      animation-delay: calc(var(--hop) * var(--step) + 0.25s);
+    }
+    .mesh.run .link-pulse {
+      animation: link-run var(--cycle) linear infinite;
+      animation-delay: calc(var(--hop) * var(--step) + 0.25s);
+    }
+    .mesh.run .droplet circle {
+      animation: droplet var(--cycle) cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+      animation-delay: calc(var(--k) * 0.5s);
+    }
+    .map-river-flow {
+      animation: river 9s linear infinite;
+    }
+    .map-drift {
+      animation: drift 40s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes node-hit {
+    0% {
+      transform: scale(1);
+    }
+    3% {
+      transform: scale(1.7);
+      fill: var(--brass-lit);
+    }
+    14% {
+      transform: scale(1);
+    }
+  }
+  @keyframes node-ring {
+    0% {
+      opacity: 0.9;
+      transform: scale(0.8);
+    }
+    22% {
+      opacity: 0;
+      transform: scale(3.6);
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  @keyframes link-run {
+    0% {
+      opacity: 1;
+      stroke-dashoffset: 1;
+    }
+    6.3% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    16% {
+      opacity: 0;
+      stroke-dashoffset: 0;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  @keyframes droplet {
+    0% {
+      opacity: 0.8;
+      transform: scale(0.1);
+    }
+    55% {
+      opacity: 0;
+      transform: scale(14);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(14);
+    }
+  }
+  @keyframes river {
+    to {
+      stroke-dashoffset: -170;
+    }
+  }
+  @keyframes drift {
+    to {
+      transform: translate(-18px, 10px);
+    }
   }
 
   .steps {
@@ -178,64 +471,30 @@ const nodes = [
     line-height: 1.6;
   }
 
-  /*
-   * Motion. With scroll-driven animations the SOS travels the route as the
-   * section scrolls through the viewport, and the brass trail draws behind
-   * it. Elsewhere it loops while the diagram is on screen. Reduced motion:
-   * the packet rests at basecamp and the trail is drawn in full.
-   */
-  @media (prefers-reduced-motion: no-preference) {
-    .route[data-running] .packet {
-      animation: travel 3.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-    }
-    .route[data-running] .route-trail {
-      animation: trail 3.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-    }
-    @supports (animation-timeline: view()) {
-      .route {
-        view-timeline-name: --route;
-      }
-      .route .packet,
-      .route[data-running] .packet {
-        animation: travel linear both;
-        animation-timeline: --route;
-        animation-range: cover 20% cover 70%;
-      }
-      .route .route-trail,
-      .route[data-running] .route-trail {
-        animation: trail linear both;
-        animation-timeline: --route;
-        animation-range: cover 20% cover 70%;
-      }
-    }
-  }
-  @keyframes travel {
-    from {
-      offset-distance: 0%;
-    }
-    to {
-      offset-distance: 100%;
-    }
-  }
-  @keyframes trail {
-    from {
-      stroke-dashoffset: 1;
-    }
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-
   @media (max-width: 799px) {
     .steps {
       grid-template-columns: minmax(0, 1fr);
     }
+  }
+  /* Small screens: the map scales down, so the marks scale up. */
+  @media (max-width: 639px) {
+    .labels {
+      display: none;
+    }
+    .node-core {
+      r: 13px;
+    }
+    .link-base {
+      stroke-width: 3;
+    }
+    .link-pulse {
+      stroke-width: 5;
+    }
     .route-proof {
       position: static;
-      margin-bottom: 0.5rem;
-    }
-    .node text {
-      font-size: 17px;
+      display: flex;
+      width: fit-content;
+      margin: 0.9rem 1.1rem 0;
     }
   }
 </style>
