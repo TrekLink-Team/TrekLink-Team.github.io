@@ -32,6 +32,7 @@ export function mountCarousel(): void {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   let index = -1;
   let frame = 0;
+  let snapReleaseTimer = 0;
 
   /** True when the cards overflow the track, so paging does something. */
   const isPaged = () => track.scrollWidth - track.clientWidth > 4;
@@ -74,13 +75,31 @@ export function mountCarousel(): void {
     }
   }
 
+  /**
+   * scroll-snap-type: mandatory can truncate a JS scrollTo({behavior:
+   * 'smooth'}) partway, the snap machinery intervenes mid-animation and the
+   * track settles short of the requested offset. Suspending snap for the
+   * duration of a programmatic scroll and restoring it once the track
+   * settles avoids that fight while leaving snap-on-release intact for a
+   * real touch swipe.
+   */
+  function scrollTrackTo(left: number): void {
+    track!.style.scrollSnapType = 'none';
+    clearTimeout(snapReleaseTimer);
+    const release = () => {
+      clearTimeout(snapReleaseTimer);
+      track!.removeEventListener('scrollend', release);
+      track!.style.scrollSnapType = '';
+    };
+    track!.addEventListener('scrollend', release, { once: true });
+    snapReleaseTimer = window.setTimeout(release, 500);
+    track!.scrollTo({ left, behavior: reduced.matches ? 'auto' : 'smooth' });
+  }
+
   function goTo(i: number): void {
     const target = items[Math.max(0, Math.min(items.length - 1, i))];
     if (!target) return;
-    track!.scrollTo({
-      left: snapOf(target),
-      behavior: reduced.matches ? 'auto' : 'smooth',
-    });
+    scrollTrackTo(snapOf(target));
   }
 
   /**
@@ -99,9 +118,32 @@ export function mountCarousel(): void {
     if (target >= 0) goTo(target);
   }
 
+  /**
+   * A card with zero overlap with the track's visible span is hidden
+   * entirely, not just clipped by overflow. A card that is still laid out
+   * and painted just past the edge still contributes its own glass fill to
+   * what the visible card's backdrop-filter samples underneath it, which
+   * washed the blur out on every card but the one truly alone in view.
+   */
+  function syncOffscreen(): void {
+    if (!isPaged()) {
+      items.forEach((item) => item.removeAttribute('data-offscreen'));
+      return;
+    }
+    const left = track!.scrollLeft;
+    const right = left + track!.clientWidth;
+    items.forEach((item) => {
+      const hidden = item.offsetLeft + item.offsetWidth <= left || item.offsetLeft >= right;
+      item.toggleAttribute('data-offscreen', hidden);
+    });
+  }
+
   function onScroll(): void {
     cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(() => paint(nearest(), true));
+    frame = requestAnimationFrame(() => {
+      paint(nearest(), true);
+      syncOffscreen();
+    });
   }
 
   prev.addEventListener('click', () => step(-1));
@@ -126,6 +168,7 @@ export function mountCarousel(): void {
     root!.toggleAttribute('data-paged', paged);
     index = -1;
     paint(paged ? nearest() : 0, false);
+    syncOffscreen();
   }
 
   sync();
