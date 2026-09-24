@@ -1,0 +1,123 @@
+---
+import { useTranslations, type Locale, type TranslationKey } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+/* The objections a trip organiser raises before carrying anything new. Native
+   <details>: keyboard and no-JS behaviour come with the element. */
+const qa = (['a', 'b', 'c'] as const).map((k) => ({
+  q: t(`faq.${k}.q` as TranslationKey),
+  a: t(`faq.${k}.a` as TranslationKey),
+}));
+---
+
+<section class="section faq" id="faq" aria-labelledby="faq-heading">
+  <div class="shell faq-grid">
+    <header class="section-head" data-reveal>
+      <p class="eyebrow">{t('faq.eyebrow')}</p>
+      <h2 id="faq-heading">{t('faq.heading')}</h2>
+    </header>
+    <div class="qa">
+      {
+        qa.map((item, i) => (
+          <details class="glass" data-reveal style={`--i:${i}`} open={i === 0}>
+            <summary>
+              <span>{item.q}</span>
+              <span class="plus" aria-hidden="true" />
+            </summary>
+            <p>{item.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(1.5rem, 1rem + 3vw, 4rem);
+    align-items: start;
+  }
+  .qa {
+    display: grid;
+    gap: 0.75rem;
+  }
+  details {
+    padding: 0;
+    transition: border-color var(--dur) var(--ease);
+  }
+  details[open] {
+    border-color: var(--moss-line);
+  }
+  summary {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    min-height: 3rem;
+    padding: 1.1rem 1.2rem;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: var(--step-1);
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary:focus-visible {
+    outline-offset: -3px;
+  }
+  .plus {
+    position: relative;
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+  }
+  .plus::before,
+  .plus::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(50% - 1px);
+    height: 2px;
+    background: var(--brass);
+    transition: transform var(--dur-spring) var(--spring);
+  }
+  .plus::after {
+    transform: rotate(90deg);
+  }
+  details[open] .plus::after {
+    transform: rotate(0deg);
+  }
+  details p {
+    padding: 0 1.2rem 1.2rem;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 56ch;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    details[open] p {
+      animation: faq-open 420ms var(--ease-out);
+    }
+  }
+  @keyframes faq-open {
+    from {
+      opacity: 0;
+      transform: translateY(-0.4rem);
+    }
+  }
+  @media (max-width: 799px) {
+    .faq-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

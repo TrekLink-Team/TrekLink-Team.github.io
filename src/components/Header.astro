@@ -12,12 +12,13 @@ const other: Locale = locale === 'en' ? 'vi' : 'en';
 
 const sections = [
   { id: 'problem', label: t('nav.problem') },
+  { id: 'how', label: t('nav.how') },
   { id: 'nodes', label: t('nav.nodes') },
-  { id: 'research', label: t('nav.research') },
+  { id: 'faq', label: t('nav.faq') },
 ];
 ---
 
-<header class="site-header">
+<header class="site-header" data-site-header>
   <div class="header-rail">
     <a class="wordmark" href={home}>
       {/* The mark alone. The lockup also carries the word, and setting it
@@ -38,7 +39,7 @@ const sections = [
       rather than a full round, because the rest of the page reads as field
       equipment and a lozenge would not.
     */}
-    <nav class="capsule glass" aria-label={t('nav.label')}>
+    <nav class="capsule" aria-label={t('nav.label')}>
       <ul>
         {
           sections.map((s) => (
@@ -80,8 +81,7 @@ const sections = [
         data-system-link
         data-label={t('system.link')}
         data-checking={t('system.checking')}
-        data-toast-title={t('system.unavailable.title')}
-        data-toast-body={t('system.unavailable.body')}
+        data-toast-message={t('system.toast')}
         data-toast-dismiss={t('system.unavailable.dismiss')}
       >
         <span data-system-link-text>{t('system.link')}</span>
@@ -116,50 +116,79 @@ const sections = [
         ))
       }
     </ul>
+    <div class="mobile-system">
+      <a
+        class="btn btn-primary"
+        href={siteConfig.operationsUrl}
+        data-system-link
+        data-label={t('system.link')}
+        data-checking={t('system.checking')}
+        data-toast-message={t('system.toast')}
+        data-toast-dismiss={t('system.unavailable.dismiss')}
+      >
+        <span data-system-link-text>{t('system.link')}</span>
+        <span class="spinner" aria-hidden="true"></span>
+      </a>
+    </div>
   </div>
 </header>
 
 <style>
+  /*
+   * A floating glass bar. Sticky by default, so it works without JavaScript.
+   * The header island adds [data-hidden] while the visitor scrolls down and
+   * removes it the moment they scroll up; the move is a transform on the
+   * compositor, so it never shifts layout or jitters.
+   */
   .site-header {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: color-mix(in srgb, var(--surface-base) 82%, transparent);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--surface-ridge);
+    padding: 0.6rem var(--gutter) 0;
+    transition: transform 420ms var(--ease-out);
+    will-change: transform;
+  }
+  .site-header[data-hidden] {
+    transform: translateY(calc(-100% - 0.5rem));
   }
 
   .header-rail {
     max-width: var(--shell);
     margin-inline: auto;
-    padding: 0.7rem var(--gutter);
+    padding: 0.4rem 0.4rem 0.4rem 0.9rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
+    border: 1px solid var(--glass-edge);
+    border-top-color: var(--glass-edge-lit);
+    border-radius: var(--radius-lg);
+    background: var(--glass-solid);
+    box-shadow: var(--shadow-glass);
+    transition: background-color var(--dur) var(--ease);
+  }
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .header-rail {
+      background: linear-gradient(155deg, var(--glass-fill-top), var(--glass-fill-bottom)), var(--glass-dense);
+      backdrop-filter: blur(16px) saturate(150%);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
+    }
   }
 
   .wordmark {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.55rem;
+    min-height: 2.75rem;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--ink);
     text-decoration: none;
     white-space: nowrap;
   }
-
-  /*
-   * 2.1rem rather than matching the cap height of the wordmark beside it. The
-   * mark carries signal waves flanking the peaks, and below roughly 40px those
-   * waves collapse into a smear. There is no clean vertical gap to crop them
-   * away at, because they overlap the peaks horizontally, so the answer is to
-   * give the whole mark the room it needs.
-   */
+  /* The waves beside the peaks smear below roughly 40px of mark height. */
   .wordmark-mark {
     height: 2.1rem;
     width: auto;
@@ -168,8 +197,6 @@ const sections = [
 
   .capsule {
     margin-inline: auto;
-    padding: 0.3rem;
-    border-radius: var(--radius);
   }
   .capsule ul {
     display: flex;
@@ -180,10 +207,11 @@ const sections = [
     padding: 0;
   }
   .capsule a {
+    position: relative;
     display: block;
-    padding: 0.5rem 0.95rem;
+    padding: 0.7rem 0.9rem;
     border-radius: var(--radius-sm);
-    font-size: var(--step--1);
+    font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -193,51 +221,71 @@ const sections = [
       color var(--dur) var(--ease),
       background-color var(--dur) var(--ease);
   }
+  .capsule a::after {
+    content: '';
+    position: absolute;
+    left: 0.9rem;
+    right: 0.9rem;
+    bottom: 0.35rem;
+    height: 2px;
+    background: var(--brass);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-spring) var(--spring);
+  }
   .capsule a:hover {
     color: var(--ink);
-    background: rgb(255 255 255 / 5%);
   }
-  /* Set by the scrollspy island. Never scrolls; only marks (REQ-EVT-06). */
   .capsule a[aria-current='true'] {
     color: var(--brass-lit);
-    background: rgb(192 138 62 / 13%);
+  }
+  .capsule a[aria-current='true']::after,
+  .capsule a:hover::after {
+    transform: scaleX(1);
   }
 
   .header-end {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
     margin-left: auto;
   }
 
   .lang {
-    font-size: var(--step--1);
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    font-size: 0.8rem;
     font-weight: 800;
     letter-spacing: 0.1em;
     color: var(--ink-muted);
     text-decoration: none;
-    padding: 0.55rem 0.6rem;
     border: 1px solid var(--surface-ridge);
     border-radius: var(--radius-sm);
+    transition:
+      color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
   }
   .lang:hover {
     color: var(--moss);
-    border-color: var(--moss-deep);
+    border-color: var(--moss);
   }
 
   .system-link {
     position: relative;
-    padding-block: 0.7rem;
+    min-height: 2.75rem;
+    padding-block: 0.6rem;
+    box-shadow: 0 4px 0 var(--brass-deep);
   }
   .system-link[data-state='checking'] {
     pointer-events: none;
   }
-
   .spinner {
     display: none;
     width: 0.85em;
     height: 0.85em;
-    border: 2px solid rgb(0 0 0 / 30%);
+    border: 2px solid var(--shade);
     border-top-color: var(--ink-inverse);
     border-radius: 50%;
     animation: spin 700ms linear infinite;
@@ -253,33 +301,36 @@ const sections = [
 
   .menu-toggle {
     display: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
     background: transparent;
     border: 1px solid var(--surface-ridge);
     border-radius: var(--radius-sm);
-    padding: 0.6rem;
     cursor: pointer;
   }
   .bars {
     display: grid;
-    gap: 4px;
+    gap: 5px;
     width: 18px;
   }
   .bars i {
     display: block;
     height: 2px;
     background: var(--ink);
-    transition: transform var(--dur) var(--ease);
+    transition: transform var(--dur-spring) var(--spring);
   }
   .menu-toggle[aria-expanded='true'] .bars i:first-child {
-    transform: translateY(3px) rotate(45deg);
+    transform: translateY(3.5px) rotate(45deg);
   }
   .menu-toggle[aria-expanded='true'] .bars i:last-child {
-    transform: translateY(-3px) rotate(-45deg);
+    transform: translateY(-3.5px) rotate(-45deg);
   }
 
   .mobile-nav {
-    margin: 0 var(--gutter) 0.7rem;
-    border-radius: var(--radius);
+    max-width: var(--shell);
+    margin: 0.4rem auto 0;
+    border-radius: var(--radius-lg);
   }
   .mobile-nav ul {
     list-style: none;
@@ -288,7 +339,7 @@ const sections = [
   }
   .mobile-nav a {
     display: block;
-    padding: 0.8rem 0.9rem;
+    padding: 0.9rem;
     font-weight: 700;
     font-size: var(--step--1);
     letter-spacing: 0.12em;
@@ -300,22 +351,33 @@ const sections = [
   .mobile-nav a:hover,
   .mobile-nav a[aria-current='true'] {
     color: var(--brass-lit);
-    background: rgb(192 138 62 / 13%);
+    background: var(--brass-tint);
   }
 
-  @media (max-width: 899px) {
+  .mobile-system {
+    padding: 0.2rem 0.4rem 0.6rem;
+  }
+  .mobile-system .btn {
+    width: 100%;
+  }
+  .mobile-system [data-state='checking'] .spinner {
+    display: inline-block;
+  }
+
+  @media (max-width: 959px) {
     .capsule {
       display: none;
     }
     .menu-toggle {
-      display: block;
+      display: grid;
     }
   }
-
-  @media (max-width: 559px) {
+  @media (max-width: 599px) {
     .system-link {
-      padding-inline: 0.9rem;
+      display: none;
     }
+  }
+  @media (max-width: 339px) {
     .wordmark span:last-child {
       display: none;
     }

@@ -1,5 +1,5 @@
 ---
-import { useTranslations, type Locale } from '../i18n';
+import { useTranslations, type Locale, type TranslationKey } from '../i18n';
 import { media, type MediaKey } from '../lib/media';
 
 interface Props {
@@ -9,58 +9,67 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 
 /*
- * One node, three versions. Every board, SOS mechanism and uplink fact below
- * is cited in treklink-docs/_docs/00-project-context/04-firmware-ground-truth.md
- * section 5 and its platformio.ini references. v1 is deliberately absent: D-005
- * puts it out of the demo set, and its MQTT is compiled out at build time.
+ * Four iterations. v1 is the retired perfboard prototype: shown for the
+ * story of how the node improved, labelled so nobody mistakes it for a
+ * current option. Every spec below comes from the firmware variant configs.
  */
-const nodes = ['v2', 'v3', 'v4'] as const;
+const nodes = ['v1', 'v2', 'v3', 'v4'] as const;
+const k = (v: string, f: string) => `node.${v}.${f}` as TranslationKey;
 const cards = nodes.map((v) => ({
   id: v,
-  name: t(`node.${v}.name` as 'node.v2.name'),
-  body: t(`node.${v}.body` as 'node.v2.body'),
-  alt: t(`node.${v}.alt` as 'node.v2.alt'),
+  retired: v === 'v1',
+  flagship: v === 'v4',
+  name: t(k(v, 'name')),
+  tag: t(k(v, 'tag')),
+  hook: t(k(v, 'hook')),
+  body: t(k(v, 'body')),
+  alt: t(k(v, 'alt')),
   image: media[`node-${v}` as MediaKey],
   specs: [
-    { k: t('nodes.spec.board'), v: t(`node.${v}.board` as 'node.v2.board') },
-    { k: t('nodes.spec.sos'), v: t(`node.${v}.sos` as 'node.v2.sos') },
-    { k: t('nodes.spec.uplink'), v: t(`node.${v}.uplink` as 'node.v2.uplink') },
+    { k: t('nodes.spec.board'), v: t(k(v, 'board')) },
+    { k: t('nodes.spec.sos'), v: t(k(v, 'sos')) },
+    { k: t('nodes.spec.fall'), v: t(k(v, 'fall')), no: v === 'v3' },
   ],
 }));
+const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
 ---
 
-<section class="section" id="nodes">
+<section class="section nodes" id="nodes" aria-labelledby="nodes-heading">
   <div class="shell">
-    <header class="section-head">
+    <header class="section-head" data-reveal>
       <p class="eyebrow">{t('nodes.eyebrow')}</p>
-      <h2>{t('nodes.heading')}</h2>
+      <h2 id="nodes-heading">{t('nodes.heading')}</h2>
       <p class="lede">{t('nodes.lede')}</p>
     </header>
 
     {/*
-      A scroll-snapped track, not a transform-driven slider. Without
-      JavaScript it is a horizontally scrollable list that works by touch,
-      trackpad and keyboard already (REQ-ERR-05). The island adds the buttons,
-      the live region and the arrow keys on top of behaviour that exists.
+      A flex scroll-snap track. Without JavaScript it is already a list that
+      swipes by touch, scrolls by trackpad and pages by keyboard (REQ-ERR-05).
+      The island adds the arrows, the numbered pager, arrow keys and the live
+      announcement. From 1100px all four cards fit, and the controls stay
+      hidden because paging would do nothing.
     */}
     <div
       class="carousel"
       data-carousel
-      role="group"
+      role="region"
       aria-roledescription="carousel"
       aria-label={t('nodes.carousel.label')}
     >
-      <ul class="track" data-carousel-track tabindex="0">
+      <div class="track" data-carousel-track tabindex="0" role="group" aria-label={t('nodes.carousel.label')}>
         {
           cards.map((card, i) => (
-            <li
-              class="card glass"
+            <article
+              class:list={['node-card', 'glass', { retired: card.retired, flagship: card.flagship }]}
               data-carousel-item
+              data-reveal
+              style={`--i:${i}`}
               role="group"
               aria-roledescription="slide"
               aria-label={`${i + 1} / ${cards.length}: ${card.name}`}
             >
-              <div class="card-media plate">
+              <div class="node-media">
+                <span class="node-tag">{card.tag}</span>
                 <img
                   src={card.image.src}
                   alt={card.alt}
@@ -70,180 +79,390 @@ const cards = nodes.map((v) => ({
                   decoding="async"
                 />
               </div>
-              <h3>{card.name}</h3>
-              <p class="card-body">{card.body}</p>
+              <div class="node-text">
+                <h3>
+                  <span class="node-word">{t('nodes.word')}</span> {card.name}
+                </h3>
+                <p class="node-hook">{card.hook}</p>
+                <p class="node-body">{card.body}</p>
+              </div>
               <dl class="specs">
                 {card.specs.map((s) => (
                   <div class="spec">
                     <dt>{s.k}</dt>
-                    <dd>{s.v}</dd>
+                    <dd class:list={[{ no: s.no }]}>{s.v}</dd>
                   </div>
                 ))}
               </dl>
-            </li>
+            </article>
           ))
         }
-      </ul>
+      </div>
 
       <div class="controls" data-carousel-controls hidden>
-        <button type="button" data-carousel-prev aria-label={t('nodes.prev')}>
-          <span aria-hidden="true">&#8592;</span>
+        <button type="button" class="ctl" data-carousel-prev aria-label={t('nodes.prev')}>
+          <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" /></svg>
         </button>
-        <span class="dots" data-carousel-dots aria-hidden="true"></span>
-        <button type="button" data-carousel-next aria-label={t('nodes.next')}>
-          <span aria-hidden="true">&#8594;</span>
+        <div class="pager" data-carousel-pager>
+          {
+            cards.map((card, i) => (
+              <button type="button" class="pip" data-carousel-goto={i} aria-label={`${i + 1} / ${cards.length}: ${card.name}`}>
+                <span>{card.id}</span>
+              </button>
+            ))
+          }
+        </div>
+        <button type="button" class="ctl" data-carousel-next aria-label={t('nodes.next')}>
+          <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="m7.5 4 6 6-6 6" /></svg>
         </button>
       </div>
 
       {/* REQ-EVT-07: the change is announced, not only shown. */}
       <p class="sr-only" role="status" aria-live="polite" data-carousel-status></p>
     </div>
+
+    <div class="board glass" data-reveal>
+      <div class="board-media">
+        <img
+          src={media['pcb-v2'].src}
+          alt={t('board.alt')}
+          width={media['pcb-v2'].width}
+          height={media['pcb-v2'].height}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <div class="board-copy">
+        <p class="eyebrow">{t('board.eyebrow')}</p>
+        <h3>{t('board.heading')}</h3>
+        <ul>
+          {boardPoints.map((b) => <li>{b}</li>)}
+        </ul>
+      </div>
+    </div>
   </div>
 </section>
 
 <style>
-  .section-head {
-    display: grid;
-    gap: 1rem;
-    max-width: 46rem;
-  }
-  h2 {
-    font-size: var(--step-3);
-  }
-
   .carousel {
-    margin-top: clamp(2.2rem, 1.6rem + 2.6vw, 3.4rem);
+    margin-top: clamp(2rem, 1.4rem + 2.6vw, 3.4rem);
   }
 
+  /*
+   * The track bleeds to the viewport edge on phones so the next card peeks in,
+   * which is the affordance that says "swipe". position: relative makes it the
+   * offsetParent of its cards, so the island's scroll maths is exact.
+   */
   .track {
+    position: relative;
     list-style: none;
-    margin: 0;
-    padding: 0.25rem;
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 1fr);
-    gap: 1rem;
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 0.5rem var(--gutter) 1.25rem;
+    display: flex;
+    gap: 0.9rem;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
-    scrollbar-width: thin;
-    scrollbar-color: var(--surface-ridge) transparent;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .track::-webkit-scrollbar {
+    display: none;
   }
   .track:focus-visible {
-    outline-offset: 0;
+    outline-offset: -2px;
   }
 
-  .card {
-    scroll-snap-align: center;
-    padding: 1rem;
+  .node-card {
+    flex: 0 0 min(84%, 21rem);
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
     display: grid;
-    gap: 0.9rem;
-    align-content: start;
+    grid-template-rows: auto auto 1fr;
+    gap: 1rem;
+    padding: 0.75rem 0.75rem 0.5rem;
+    transition:
+      transform var(--dur-spring) var(--spring),
+      opacity var(--dur-spring) var(--ease-out),
+      border-color var(--dur) var(--ease);
+  }
+  .node-card.flagship {
+    border-color: var(--brass);
+    box-shadow: var(--shadow-glass), 0 0 0 1px var(--brass-tint-strong), 0 1.5rem 4rem -1rem var(--brass-glow);
+  }
+  .node-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--glass-edge-lit);
   }
 
-  .card-media {
-    padding: 0.45rem;
+  /* Set by the island only while paging is possible: the card in view is
+     full strength, its neighbours step back. */
+  .carousel[data-paged] .node-card:not([data-active]) {
+    transform: scale(0.965);
+    border-color: var(--glass-edge);
   }
-  .card-media img {
-    width: 100%;
+
+  .node-media {
+    position: relative;
+    aspect-ratio: 4 / 3;
     border-radius: calc(var(--radius-lg) - 3px);
+    background:
+      radial-gradient(70% 70% at 60% 45%, var(--brass-tint-strong), transparent 70%),
+      var(--surface-raised);
+    box-shadow: var(--shadow-neo);
+    overflow: hidden;
+  }
+  .node-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform var(--dur-spring) var(--spring);
+  }
+  .node-card:hover .node-media img {
+    transform: scale(1.04) rotate(-1deg);
+  }
+  .node-tag {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 1;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--moss-lit);
+    background: var(--surface-base);
+    border: 1px solid var(--moss-line);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+  .flagship .node-tag {
+    color: var(--ink-inverse);
+    background: var(--brass);
+    border-color: var(--brass);
+  }
+  /* Retired: still shown, clearly out of the line-up. Dashed edge, a hatched
+     tag and a desaturated photo; the text keeps full contrast. */
+  .retired {
+    border-style: dashed;
+  }
+  .retired .node-tag {
+    color: var(--ink-muted);
+    border-color: var(--ink-faint);
+    border-style: dashed;
+  }
+  .retired .node-media img {
+    filter: grayscale(0.7);
+  }
+  .node-word {
+    color: var(--ink-faint);
+    font-size: 0.6em;
+    letter-spacing: 0.1em;
+    vertical-align: 0.25em;
   }
 
-  .card h3 {
-    font-size: var(--step-2);
-    color: var(--ink);
-    padding-inline: 0.4rem;
+  .node-text {
+    display: grid;
+    gap: 0.4rem;
+    padding-inline: 0.35rem;
   }
-  .card-body {
+  .node-text h3 {
+    font-size: var(--step-2);
+  }
+  .node-hook {
+    font-weight: 700;
+    color: var(--moss-lit);
+    line-height: 1.4;
+  }
+  .node-body {
     color: var(--ink-muted);
     font-size: var(--step--1);
     line-height: 1.6;
-    padding-inline: 0.4rem;
   }
 
   .specs {
-    margin: 0.2rem 0 0;
-    padding: 0.4rem;
-    display: grid;
-    gap: 0;
+    margin: 0;
+    padding: 0.25rem 0.35rem;
     border-top: 1px solid var(--glass-edge);
+    align-self: end;
   }
   .spec {
     display: grid;
-    grid-template-columns: 7rem 1fr;
-    gap: 0.8rem;
-    padding: 0.55rem 0;
-    border-bottom: 1px solid rgb(255 255 255 / 6%);
+    grid-template-columns: minmax(5.5rem, 38%) minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--ink-tint);
   }
   .spec:last-child {
     border-bottom: 0;
   }
   .spec dt {
-    font-size: var(--step--1);
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.13em;
     text-transform: uppercase;
     color: var(--ink-faint);
+    padding-top: 0.12rem;
+  }
+  .spec dd.no {
+    color: var(--ink-muted);
+    font-weight: 500;
   }
   .spec dd {
     margin: 0;
     font-size: var(--step--1);
-    color: var(--ink);
     font-weight: 600;
+    color: var(--ink);
+    overflow-wrap: anywhere;
   }
 
   .controls {
-    margin-top: 1.2rem;
+    margin-top: 0.4rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.75rem;
   }
-  .controls button {
+  .controls[hidden] {
+    display: none;
+  }
+  .ctl {
     width: 2.75rem;
     height: 2.75rem;
     display: grid;
     place-items: center;
-    font-size: 1.1rem;
     color: var(--ink);
     background: var(--surface-raised);
     border: 1px solid var(--surface-ridge);
     border-radius: var(--radius);
     cursor: pointer;
     transition:
+      transform var(--dur-spring) var(--spring),
       color var(--dur) var(--ease),
       border-color var(--dur) var(--ease);
   }
-  .controls button:hover:not(:disabled) {
-    color: var(--brass-lit);
-    border-color: var(--brass-deep);
+  .ctl svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
-  .controls button:disabled {
+  .ctl:hover:not(:disabled) {
+    color: var(--brass-lit);
+    border-color: var(--brass);
+  }
+  .ctl:active:not(:disabled) {
+    transform: scale(0.92);
+  }
+  .ctl:disabled {
     opacity: 0.35;
     cursor: default;
   }
-
-  .dots {
+  .pager {
     display: inline-flex;
-    gap: 0.4rem;
+    gap: 0.35rem;
   }
-  .dots i {
-    width: 0.45rem;
-    height: 0.45rem;
-    border-radius: 50%;
-    background: var(--surface-ridge);
-    transition: background-color var(--dur) var(--ease);
+  .pip {
+    min-width: 2.75rem;
+    height: 2.75rem;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 0;
   }
-  .dots i[data-active] {
+  .pip span {
+    display: block;
+    padding: 0.2rem 0.45rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border: 1px solid var(--surface-ridge);
+    transition:
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease),
+      transform var(--dur-spring) var(--spring);
+  }
+  .pip[aria-current='true'] span {
     background: var(--brass);
+    border-color: var(--brass);
+    color: var(--ink-inverse);
+    transform: scale(1.08);
   }
 
-  /* Below the breakpoint the track is one card wide and swipes, which is what
-     a touch visitor expects without being told. */
-  @media (max-width: 899px) {
+  /* The board behind v2: proof placed under the line-up it explains. */
+  .board {
+    margin-top: clamp(2rem, 1.4rem + 2.6vw, 3.2rem);
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: clamp(1rem, 0.5rem + 2vw, 2.5rem);
+    padding: clamp(1rem, 0.6rem + 2vw, 2rem);
+    overflow: hidden;
+  }
+  .board-media img {
+    width: 100%;
+    filter: drop-shadow(0 1.5rem 2rem var(--shade));
+    transition: transform var(--dur-spring) var(--spring);
+  }
+  .board:hover .board-media img {
+    transform: rotate(-2deg) scale(1.03);
+  }
+  .board-copy {
+    display: grid;
+    gap: 0.9rem;
+  }
+  .board-copy h3 {
+    font-size: var(--step-3);
+  }
+  .board-copy ul {
+    list-style: none;
+    margin: 0.3rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .board-copy li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.7rem;
+    align-items: baseline;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .board-copy li::before {
+    content: '';
+    width: 0.55rem;
+    height: 0.55rem;
+    background: var(--moss);
+    transform: rotate(45deg) translateY(-0.1rem);
+  }
+  @media (max-width: 759px) {
+    .board {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* All four fit: a plain four-column row from 1100px, no paging, no bleed. */
+  @media (min-width: 1100px) {
     .track {
-      grid-auto-columns: minmax(0, 82%);
-      padding-inline: 0.25rem;
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .node-card {
+      flex: none;
     }
   }
 </style>
