@@ -1,6 +1,6 @@
 ---
 import { useTranslations, type Locale } from '../i18n';
-import { media } from '../lib/media';
+import { brandMedia } from '../lib/media';
 import { withUtm } from '../lib/utm';
 
 interface Props {
@@ -12,9 +12,19 @@ const t = useTranslations(locale);
 /*
  * The mesh layer is Meshtastic. Every figure here is public: the licence is
  * on the firmware repository, the contributor count and start year are in
- * the project's public history. The trademark notice is required by
- * Meshtastic's trademark terms and stays beside the logo.
+ * the project's public history.
+ *
+ * The logo is Meshtastic's "M-Powered" community logo, which needs no
+ * trademark grant but does carry conditions under Meshtastic's Licensing and
+ * Trademark guidelines: shown unaltered, hyperlinked to meshtastic.org,
+ * the ® on first use of the name, the registered-trademark attribution, and
+ * a statement that the site is not affiliated with or endorsed by the
+ * project. The notice sits directly under the logo so the two never part.
+ * The guidelines also ask for a copy of the use to be sent to Meshtastic's
+ * trademark supervisor within seven days of first use; that is a task for
+ * the team, tracked in specs/landing/requirements.md (Q5), not code.
  */
+const logo = brandMedia.meshtasticPowered;
 const proof = [
   { v: t('mesh.proof.license.value'), l: t('mesh.proof.license') },
   { v: t('mesh.proof.contrib.value'), l: t('mesh.proof.contrib') },
@@ -22,6 +32,7 @@ const proof = [
 ];
 const adds = [t('mesh.add.a'), t('mesh.add.b'), t('mesh.add.c')];
 const link = withUtm('https://meshtastic.org/', { campaign: 'home', content: 'meshtastic' });
+const logoLink = withUtm('https://meshtastic.org/', { campaign: 'home', content: 'meshtastic-logo' });
 ---
 
 <section class="section meshtastic grain" id="meshtastic" aria-labelledby="mesh-heading">
@@ -46,15 +57,18 @@ const link = withUtm('https://meshtastic.org/', { campaign: 'home', content: 'me
     </div>
 
     <div class="mt-side" data-reveal style="--i:1">
-      <figure class="mt-logo">
-        <img
-          src={media.meshtastic.src}
-          alt={t('mesh.logo.alt')}
-          width={media.meshtastic.width}
-          height={media.meshtastic.height}
-          loading="lazy"
-          decoding="async"
-        />
+      <figure class="mt-mark">
+        <a class="mt-logo" href={logoLink} rel="noopener noreferrer">
+          <img
+            src={logo.src}
+            alt={t('mesh.logo.alt')}
+            width={logo.width}
+            height={logo.height}
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+        <figcaption class="mt-legal">{t('mesh.disclaimer')}</figcaption>
       </figure>
       <div class="mt-adds glass">
         <h3>{t('mesh.adds')}</h3>
@@ -64,7 +78,6 @@ const link = withUtm('https://meshtastic.org/', { campaign: 'home', content: 'me
       </div>
     </div>
 
-    <p class="mt-legal">{t('mesh.disclaimer')}</p>
   </div>
 </section>
 
@@ -106,6 +119,11 @@ const link = withUtm('https://meshtastic.org/', { campaign: 'home', content: 'me
   .mt-side {
     display: grid;
     gap: 1rem;
+  }
+  .mt-mark {
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
   }
   /* The logo keeps its own green ground, unaltered, as the mark requires. */
   .mt-logo {
@@ -160,11 +178,14 @@ const link = withUtm('https://meshtastic.org/', { campaign: 'home', content: 'me
     background: var(--moss);
     transform: rotate(45deg) translateY(-0.1rem);
   }
+  .mt-logo:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 3px;
+  }
   .mt-legal {
-    grid-column: 1 / -1;
     font-size: 0.78rem;
-    color: var(--ink-faint);
-    max-width: 80ch;
+    color: var(--ink-muted);
+    max-width: 60ch;
   }
 
   @media (max-width: 859px) {

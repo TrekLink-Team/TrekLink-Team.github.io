@@ -1,6 +1,6 @@
 ---
 import { useTranslations, type Locale, type TranslationKey } from '../i18n';
-import { media, type MediaKey } from '../lib/media';
+import { media, nodeMedia, NODE_IDS } from '../lib/media';
 
 interface Props {
   locale: Locale;
@@ -13,9 +13,8 @@ const t = useTranslations(locale);
  * story of how the node improved, labelled so nobody mistakes it for a
  * current option. Every spec below comes from the firmware variant configs.
  */
-const nodes = ['v1', 'v2', 'v3', 'v4'] as const;
 const k = (v: string, f: string) => `node.${v}.${f}` as TranslationKey;
-const cards = nodes.map((v) => ({
+const cards = NODE_IDS.map((v) => ({
   id: v,
   retired: v === 'v1',
   flagship: v === 'v4',
@@ -24,7 +23,7 @@ const cards = nodes.map((v) => ({
   hook: t(k(v, 'hook')),
   body: t(k(v, 'body')),
   alt: t(k(v, 'alt')),
-  image: media[`node-${v}` as MediaKey],
+  image: nodeMedia[v],
   specs: [
     { k: t('nodes.spec.board'), v: t(k(v, 'board')) },
     { k: t('nodes.spec.sos'), v: t(k(v, 'sos')) },
@@ -130,6 +129,8 @@ const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
       <p class="sr-only" role="status" aria-live="polite" data-carousel-status></p>
     </div>
 
+    <p class="render-note">{t('nodes.renders')}</p>
+
     <div class="board glass" data-reveal>
       <div class="board-media">
         <img
@@ -190,21 +191,18 @@ const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
     padding: 0.75rem 0.75rem 0.5rem;
     transition: border-color var(--dur) var(--ease);
   }
-  /* Off the track's visible span entirely (below 1100px, paged mode only):
-     hidden from paint. Not just clipped, the backdrop-filter of a card that
-     is still laid out and half a viewport away was blending with the next
-     card's own glass fill and washing both out, so the deck now truly shows
-     one card's glass against the section backdrop at a time. */
-  .node-card[data-offscreen] {
-    visibility: hidden;
-  }
   .node-card.flagship {
     border-color: var(--brass);
     box-shadow: var(--shadow-glass), 0 0 0 1px var(--brass-tint-strong), 0 1.5rem 4rem -1rem var(--brass-glow);
   }
 
   /* The deal: as a card leaves the centre it tilts, shrinks and tucks toward
-     the middle, so the next one appears to come off the top of the deck. */
+     the middle, so the next one appears to come off the top of the deck.
+     The tuck is what makes cards overlap, so the same timeline also fades a
+     card out at the ends of its range: at rest a neighbour is fully
+     transparent and adds nothing to what the centre card's backdrop-filter
+     samples, which is what washed the glass out. Opacity, unlike
+     visibility, keeps every card in the accessibility tree. */
   @media (prefers-reduced-motion: no-preference) and (max-width: 1099px) {
     @supports (animation-timeline: view(inline)) {
       .node-card {
@@ -218,14 +216,22 @@ const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
     0% {
       transform: translateX(-38%) rotate(7deg) scale(0.84);
       z-index: 0;
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
     }
     50% {
       transform: none;
       z-index: 2;
     }
+    80% {
+      opacity: 1;
+    }
     100% {
       transform: translateX(38%) rotate(-7deg) scale(0.84);
       z-index: 0;
+      opacity: 0;
     }
   }
 
@@ -436,6 +442,13 @@ const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
   .dot[aria-current='true'] span {
     background: var(--brass);
     transform: scale(1.45);
+  }
+
+  .render-note {
+    margin: 0.6rem 0 0;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
   }
 
   .board {
