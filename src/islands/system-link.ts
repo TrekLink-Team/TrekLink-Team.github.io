@@ -57,13 +57,16 @@ export function mountSystemLink(): void {
 }
 
 function upgradeLink(link: HTMLAnchorElement): void {
+  // Without a message there is nothing honest to show on failure, so the
+  // link stays a plain link and the browser reports an outage itself.
+  if (!link.dataset.toastMessage) return;
 
   const textNode = link.querySelector<HTMLElement>('[data-system-link-text]');
   const idleLabel = link.dataset.label ?? link.textContent?.trim() ?? '';
   const checkingLabel = link.dataset.checking ?? idleLabel;
 
   const strings: ToastStrings = {
-    message: link.dataset.toastMessage ?? '',
+    message: link.dataset.toastMessage,
     dismiss: link.dataset.toastDismiss ?? 'Dismiss',
   };
 

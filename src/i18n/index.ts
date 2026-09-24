@@ -23,9 +23,9 @@ const catalogues: Record<Locale, Record<string, string | undefined>> = {
  * Resolve a key for a locale (REQ-UBI-04).
  *
  * Falls back to the English string when the Vietnamese entry is missing
- * (REQ-STA-04). Vietnamese ships with partial coverage on purpose: a visible
- * English fallback is the honest state, where a half-translated page pretending
- * to be finished is not.
+ * (REQ-STA-04). The Vietnamese catalogue is complete and the tests fail on any
+ * missing key, so the fallback is a safety net for a key added to English
+ * ahead of its translation, never a shipped state.
  *
  * It never returns a raw key and never returns undefined. A key absent from
  * English too is a programming error rather than a translation gap, so it

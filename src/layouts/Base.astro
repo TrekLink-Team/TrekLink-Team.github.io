@@ -61,16 +61,23 @@ const canonical = url(locale);
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary_large_image" />
 
+    <meta name="theme-color" content="#0f140c" />
+
     {/*
       The saved theme is applied before first paint so a light-theme visitor
-      never sees a dark flash. Dark is the brand default. Inline and tiny on
-      purpose; everything else is an island.
+      never sees a dark flash, in the page or in the browser chrome, which is
+      why theme-color sits above this. Dark is the brand default. Inline and
+      tiny on purpose; everything else is an island. The colours match the
+      theme toggle in src/islands/chrome.ts.
     */}
     <script is:inline>
       document.documentElement.classList.add('js');
       try {
         var saved = localStorage.getItem('treklink.theme');
         if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+        if (saved === 'light') {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#efece2');
+        }
       } catch (e) {}
     </script>
 
@@ -89,7 +96,6 @@ const canonical = url(locale);
       crossorigin
     />
 
-    <meta name="theme-color" content="#0f140c" />
     <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
     <link rel="apple-touch-icon" href="/favicon.png" />
 
@@ -132,10 +138,8 @@ const canonical = url(locale);
         mountBackToTop,
         mountUtmPassThrough,
       } from '../islands/chrome';
-      import {
-        mountLanguageSwitcher,
-        mountMobileNav,
-      } from '../islands/language-switcher';
+      import { mountLanguageSwitcher } from '../islands/language-switcher';
+      import { mountMobileNav } from '../islands/mobile-nav';
 
       for (const mount of [
         mountThemeToggle,
