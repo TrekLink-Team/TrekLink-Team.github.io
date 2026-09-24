@@ -43,11 +43,12 @@ const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
     </header>
 
     {/*
-      A flex scroll-snap track. Without JavaScript it is already a list that
-      swipes by touch, scrolls by trackpad and pages by keyboard (REQ-ERR-05).
-      The island adds the arrows, the numbered pager, arrow keys and the live
-      announcement. From 1100px all four cards fit, and the controls stay
-      hidden because paging would do nothing.
+      Below 1100px: a deck of full-width cards. It is a scroll-snap track, so
+      without JavaScript it already swipes both ways by touch, trackpad and
+      keyboard (REQ-ERR-05). Where scroll-driven animations exist, cards tilt
+      and tuck behind the one in view as they are swiped, like cards dealt from
+      a hand. The island adds the side arrows, the page dots, arrow keys and
+      the live announcement. From 1100px all four sit in one row.
     */}
     <div
       class="carousel"
@@ -56,65 +57,73 @@ const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
       aria-roledescription="carousel"
       aria-label={t('nodes.carousel.label')}
     >
-      <div class="track" data-carousel-track tabindex="0" role="group" aria-label={t('nodes.carousel.label')}>
-        {
-          cards.map((card, i) => (
-            <article
-              class:list={['node-card', 'glass', { retired: card.retired, flagship: card.flagship }]}
-              data-carousel-item
-              data-reveal
-              style={`--i:${i}`}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`${i + 1} / ${cards.length}: ${card.name}`}
-            >
-              <div class="node-media">
-                <span class="node-tag">{card.tag}</span>
-                <img
-                  src={card.image.src}
-                  alt={card.alt}
-                  width={card.image.width}
-                  height={card.image.height}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div class="node-text">
-                <h3>
-                  <span class="node-word">{t('nodes.word')}</span> {card.name}
-                </h3>
-                <p class="node-hook">{card.hook}</p>
-                <p class="node-body">{card.body}</p>
-              </div>
-              <dl class="specs">
-                {card.specs.map((s) => (
-                  <div class="spec">
-                    <dt>{s.k}</dt>
-                    <dd class:list={[{ no: s.no }]}>{s.v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </article>
-          ))
-        }
-      </div>
-
-      <div class="controls" data-carousel-controls hidden>
-        <button type="button" class="ctl" data-carousel-prev aria-label={t('nodes.prev')}>
-          <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" /></svg>
-        </button>
-        <div class="pager" data-carousel-pager>
+      <div class="stage">
+        <div class="track" data-carousel-track tabindex="0">
           {
             cards.map((card, i) => (
-              <button type="button" class="pip" data-carousel-goto={i} aria-label={`${i + 1} / ${cards.length}: ${card.name}`}>
-                <span>{card.id}</span>
-              </button>
+              <article
+                class:list={['node-card', 'glass', { retired: card.retired, flagship: card.flagship }]}
+                data-carousel-item
+                style={`--i:${i}`}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${i + 1} / ${cards.length}: ${t('nodes.word')} ${card.name}`}
+              >
+                <div class="node-media">
+                  <span class="node-tag">{card.tag}</span>
+                  <img
+                    src={card.image.src}
+                    alt={card.alt}
+                    width={card.image.width}
+                    height={card.image.height}
+                    loading="lazy"
+                    decoding="async"
+                    draggable="false"
+                  />
+                </div>
+                <div class="node-info">
+                  <div class="node-text">
+                    <h3>
+                      <span class="node-word">{t('nodes.word')}</span> {card.name}
+                    </h3>
+                    <p class="node-hook">{card.hook}</p>
+                    <p class="node-body">{card.body}</p>
+                  </div>
+                  <dl class="specs">
+                    {card.specs.map((s) => (
+                      <div class="spec">
+                        <dt>{s.k}</dt>
+                        <dd class:list={[{ no: s.no }]}>{s.v}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </article>
             ))
           }
         </div>
-        <button type="button" class="ctl" data-carousel-next aria-label={t('nodes.next')}>
-          <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="m7.5 4 6 6-6 6" /></svg>
+
+        <button type="button" class="ctl ctl-prev" data-carousel-prev data-carousel-controls hidden aria-label={t('nodes.prev')}>
+          <svg viewBox="0 0 20 20" width="22" height="22" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" /></svg>
         </button>
+        <button type="button" class="ctl ctl-next" data-carousel-next data-carousel-controls hidden aria-label={t('nodes.next')}>
+          <svg viewBox="0 0 20 20" width="22" height="22" aria-hidden="true"><path d="m7.5 4 6 6-6 6" /></svg>
+        </button>
+      </div>
+
+      <div class="dots" data-carousel-controls hidden>
+        {
+          cards.map((card, i) => (
+            <button
+              type="button"
+              class="dot"
+              data-carousel-goto={i}
+              aria-label={`${i + 1} / ${cards.length}: ${t('nodes.word')} ${card.name}`}
+            >
+              <span />
+            </button>
+          ))
+        }
       </div>
 
       {/* REQ-EVT-07: the change is announced, not only shown. */}
@@ -147,25 +156,22 @@ const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
   .carousel {
     margin-top: clamp(2rem, 1.4rem + 2.6vw, 3.4rem);
   }
+  .stage {
+    position: relative;
+  }
 
-  /*
-   * The track bleeds to the viewport edge on phones so the next card peeks in,
-   * which is the affordance that says "swipe". position: relative makes it the
-   * offsetParent of its cards, so the island's scroll maths is exact.
-   */
+  /* One card per page. No gap between pages: the space sits inside each
+     page so a card's tilt never reveals the next card's edge at rest. */
   .track {
     position: relative;
-    list-style: none;
-    margin: 0 calc(var(--gutter) * -1);
-    padding: 0.5rem var(--gutter) 1.25rem;
     display: flex;
-    gap: 0.9rem;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+    padding-block: 0.5rem 1rem;
+    touch-action: pan-x pan-y;
   }
   .track::-webkit-scrollbar {
     display: none;
@@ -175,33 +181,50 @@ const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
   }
 
   .node-card {
-    flex: 0 0 min(84%, 21rem);
+    flex: 0 0 100%;
     min-width: 0;
-    scroll-snap-align: start;
+    scroll-snap-align: center;
     scroll-snap-stop: always;
     display: grid;
-    grid-template-rows: auto auto 1fr;
     gap: 1rem;
     padding: 0.75rem 0.75rem 0.5rem;
-    transition:
-      transform var(--dur-spring) var(--spring),
-      opacity var(--dur-spring) var(--ease-out),
-      border-color var(--dur) var(--ease);
+    transition: border-color var(--dur) var(--ease);
   }
   .node-card.flagship {
     border-color: var(--brass);
     box-shadow: var(--shadow-glass), 0 0 0 1px var(--brass-tint-strong), 0 1.5rem 4rem -1rem var(--brass-glow);
   }
-  .node-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--glass-edge-lit);
+
+  /* The deal: as a card leaves the centre it tilts, shrinks and tucks toward
+     the middle, so the next one appears to come off the top of the deck. */
+  @media (prefers-reduced-motion: no-preference) and (max-width: 1099px) {
+    @supports (animation-timeline: view(inline)) {
+      .node-card {
+        animation: deal linear both;
+        animation-timeline: view(inline);
+        animation-range: cover 0% cover 100%;
+      }
+    }
+  }
+  @keyframes deal {
+    0% {
+      transform: translateX(-38%) rotate(7deg) scale(0.84);
+      z-index: 0;
+    }
+    50% {
+      transform: none;
+      z-index: 2;
+    }
+    100% {
+      transform: translateX(38%) rotate(-7deg) scale(0.84);
+      z-index: 0;
+    }
   }
 
-  /* Set by the island only while paging is possible: the card in view is
-     full strength, its neighbours step back. */
-  .carousel[data-paged] .node-card:not([data-active]) {
-    transform: scale(0.965);
-    border-color: var(--glass-edge);
+  .node-info {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
   }
 
   .node-media {
@@ -318,87 +341,95 @@ const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
     overflow-wrap: anywhere;
   }
 
-  .controls {
-    margin-top: 0.4rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-  }
-  .controls[hidden] {
-    display: none;
-  }
+  /* Arrows sit on the card's sides, over the photo band. */
   .ctl {
-    width: 2.75rem;
-    height: 2.75rem;
+    position: absolute;
+    top: calc(0.5rem + 0.75rem + (min(100vw, 1099px) - 2 * var(--gutter) - 1.5rem) * 0.375);
+    z-index: 5;
+    width: 2.9rem;
+    height: 2.9rem;
     display: grid;
     place-items: center;
     color: var(--ink);
-    background: var(--surface-raised);
-    border: 1px solid var(--surface-ridge);
+    background: var(--glass-dense);
+    border: 1px solid var(--glass-edge);
+    border-top-color: var(--glass-edge-lit);
     border-radius: var(--radius);
+    box-shadow: var(--shadow-glass);
     cursor: pointer;
+    transform: translateY(-50%);
     transition:
       transform var(--dur-spring) var(--spring),
       color var(--dur) var(--ease),
-      border-color var(--dur) var(--ease);
+      border-color var(--dur) var(--ease),
+      opacity var(--dur) var(--ease);
+  }
+  .ctl[hidden] {
+    display: none;
+  }
+  .ctl-prev {
+    left: 0.25rem;
+  }
+  .ctl-next {
+    right: 0.25rem;
   }
   .ctl svg {
     fill: none;
     stroke: currentColor;
-    stroke-width: 2;
+    stroke-width: 2.2;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
   .ctl:hover:not(:disabled) {
-    color: var(--brass-lit);
+    color: var(--brass);
     border-color: var(--brass);
   }
   .ctl:active:not(:disabled) {
-    transform: scale(0.92);
+    transform: translateY(-50%) scale(0.9);
   }
   .ctl:disabled {
-    opacity: 0.35;
-    cursor: default;
+    opacity: 0;
+    pointer-events: none;
   }
-  .pager {
-    display: inline-flex;
-    gap: 0.35rem;
+
+  /* Page dots, like a phone home screen. 44px targets around small marks. */
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-top: 0.1rem;
   }
-  .pip {
-    min-width: 2.75rem;
+  .dots[hidden] {
+    display: none;
+  }
+  .dot {
+    width: 2.25rem;
     height: 2.75rem;
     display: grid;
     place-items: center;
     background: transparent;
     border: 0;
-    cursor: pointer;
     padding: 0;
+    cursor: pointer;
   }
-  .pip span {
+  .dot span {
     display: block;
-    padding: 0.2rem 0.45rem;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 0.85rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    border: 1px solid var(--surface-ridge);
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--ink-faint);
     transition:
-      background-color var(--dur) var(--ease),
-      color var(--dur) var(--ease),
-      transform var(--dur-spring) var(--spring);
+      transform var(--dur-spring) var(--spring),
+      background-color var(--dur) var(--ease);
   }
-  .pip[aria-current='true'] span {
+  .dot:hover span {
+    background: var(--ink-muted);
+  }
+  .dot[aria-current='true'] span {
     background: var(--brass);
-    border-color: var(--brass);
-    color: var(--ink-inverse);
-    transform: scale(1.08);
+    transform: scale(1.45);
   }
 
-  /* The board behind v2: proof placed under the line-up it explains. */
   .board {
     margin-top: clamp(2rem, 1.4rem + 2.6vw, 3.2rem);
     display: grid;
@@ -451,18 +482,47 @@ const boardPoints = [t('board.a'), t('board.b'), t('board.c')];
     }
   }
 
-  /* All four fit: a plain four-column row from 1100px, no paging, no bleed. */
+  /* Tablet: still one card per page, laid out side by side inside it. */
+  @media (min-width: 640px) and (max-width: 1099px) {
+    .node-card {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+      padding: 1rem;
+      gap: 1.5rem;
+    }
+    .ctl {
+      top: 50%;
+    }
+  }
+
+  /* All four fit: one row from 1100px, no paging, no deck. */
   @media (min-width: 1100px) {
+    .ctl,
+    .dots {
+      display: none;
+    }
     .track {
-      margin-inline: 0;
-      padding-inline: 0;
       overflow: visible;
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 1rem;
+      padding: 0;
     }
     .node-card {
-      flex: none;
+      grid-template-rows: auto 1fr;
+      transition:
+        transform var(--dur-spring) var(--spring),
+        border-color var(--dur) var(--ease);
+    }
+    .node-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--glass-edge-lit);
+    }
+    .node-info {
+      grid-template-rows: auto 1fr;
+    }
+    .specs {
+      align-self: end;
     }
   }
 </style>

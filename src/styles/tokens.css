@@ -97,6 +97,18 @@
   --grain-warm: rgb(224 164 73 / 5%);
   --mask-solid: #000; /* mask alpha only, never painted */
 
+  /* Map layer under the mesh diagram, drawn algorithmically at build time. */
+  --map-ground: #0c110a;
+  --map-block: rgb(232 238 224 / 3.5%);
+  --map-road: rgb(179 190 166 / 17%);
+  --map-road-major: rgb(224 164 73 / 26%);
+  --map-water: #12211d;
+  --map-water-edge: rgb(120 170 150 / 22%);
+  --map-contour: rgb(159 203 107 / 13%);
+  --mesh-edge: rgb(159 203 107 / 30%);
+
+  color-scheme: dark;
+
   /* --- Status ------------------------------------------------------------ */
   --warn: #f0b85c; /* the unavailability toast, 9.9:1 on --surface-raised */
 
@@ -140,6 +152,75 @@
   --spring: cubic-bezier(0.34, 1.4, 0.64, 1); /* fallback for the linear() spring */
   --dur: 220ms;
   --dur-spring: 520ms;
+}
+
+
+/*
+ * Light theme, chosen with the header toggle. The identity holds: olive ink,
+ * brass and moss accents, glass and grain. Every accent is darkened until it
+ * clears 4.5:1 on the bone ground; ratios measured, not assumed.
+ */
+:root[data-theme='light'],
+[data-theme='light'] {
+  --surface-base: #efece2;
+  --surface-sunken: #e4e0d2;
+  --surface-2: #e8e4d8;
+  --surface-raised: #f7f5ee;
+  --surface-ridge: #cfc9b6;
+
+  --glass-fill-top: rgb(255 255 255 / 72%);
+  --glass-fill-bottom: rgb(255 255 255 / 42%);
+  --glass-edge: rgb(24 32 15 / 13%);
+  --glass-edge-lit: rgb(255 255 255 / 95%);
+  --glass-solid: #f4f2ea;
+  --glass-dense: rgb(247 245 238 / 92%);
+
+  --ink: #18200f; /* 14.2:1 on --surface-base */
+  --ink-muted: #3f4a35; /* 7.9:1 */
+  --ink-faint: #56624b; /* 5.5:1 */
+  --ink-inverse: #fbf8f0;
+
+  --brass: #855510; /* 5.4:1 as text; 6.0:1 under --ink-inverse as a fill */
+  --brass-lit: #6b430a; /* 7.3:1 */
+  --brass-deep: #4a2e05;
+  --moss: #3a6420; /* 5.9:1 */
+  --moss-lit: #2c4f17; /* 7.9:1 */
+  --moss-deep: #7fa65e;
+
+  --brass-tint: rgb(133 85 16 / 10%);
+  --brass-tint-strong: rgb(133 85 16 / 16%);
+  --brass-glow: rgb(201 138 46 / 24%);
+  --moss-tint: rgb(58 100 32 / 9%);
+  --moss-tint-strong: rgb(58 100 32 / 16%);
+  --moss-glow: rgb(125 170 80 / 24%);
+  --moss-line: rgb(58 100 32 / 45%);
+  --ink-tint: rgb(24 32 15 / 5%);
+  --shade: rgb(40 36 20 / 20%);
+  --grain-dark: rgb(70 50 15 / 7%);
+  --grain-warm: rgb(133 85 16 / 5%);
+
+  --map-ground: #e3dfd0;
+  --map-block: rgb(24 32 15 / 3%);
+  --map-road: rgb(24 32 15 / 15%);
+  --map-road-major: rgb(133 85 16 / 32%);
+  --map-water: #cdd6cb;
+  --map-water-edge: rgb(40 90 70 / 25%);
+  --map-contour: rgb(58 100 32 / 14%);
+  --mesh-edge: rgb(58 100 32 / 38%);
+
+  --warn: #7f5200;
+
+  --shadow-press: 0 5px 0 var(--brass-deep), 0 12px 24px -6px var(--brass-glow);
+  --shadow-press-down: 0 1px 0 var(--brass-deep), 0 4px 10px var(--shade);
+
+  --shadow-neo:
+    7px 7px 15px rgb(80 70 40 / 18%), -6px -6px 14px rgb(255 255 255 / 85%),
+    inset 0 0 0 1px rgb(255 255 255 / 60%);
+  --shadow-glass:
+    inset 0 1px 0 rgb(255 255 255 / 70%), 0 2px 4px rgb(40 36 20 / 8%),
+    0 18px 40px -8px rgb(40 36 20 / 20%);
+
+  color-scheme: light;
 }
 
 /* A real spring where linear() is supported: settles with one small overshoot. */
