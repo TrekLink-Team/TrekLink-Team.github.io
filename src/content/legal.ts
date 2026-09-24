@@ -1,18 +1,35 @@
 /**
  * The legal pages, in both locales. Kept as structured content rather than
- * catalogue keys because each is a document, not a set of labels; both
- * locales must carry the same section ids, which the tests check.
+ * catalogue keys because each is a document, not a set of labels. Both
+ * locales must carry the same sections, with the same number of paragraphs,
+ * list items and links in each, and identical link targets; the tests check
+ * all of it. Addresses never sit inside prose: they live in `links`, so the
+ * page renders them without parsing sentences.
  *
- * These describe what this static site actually does. They are a starting
- * point for the team's own review, not legal advice.
+ * These describe what this static site actually does, written against
+ * Vietnam's Law on Personal Data Protection (No. 91/2025/QH15) and its
+ * implementing Decree 356/2025/ND-CP, both in force from 1 January 2026.
+ * They are the team's own drafting, not legal advice; open items for review
+ * are listed in specs/landing/requirements.md (Q4).
+ *
+ * The Vietnamese version prevails where the two differ, as each document
+ * says in its language section.
  */
 import type { Locale } from '../i18n';
+import { siteConfig } from '../../site.config';
 
+export interface LegalLink {
+  label: string;
+  href: string;
+}
 export interface LegalSection {
   id: string;
   heading: string;
+  /** Paragraphs. The list, when present, renders after the first one. */
   body: string[];
   list?: string[];
+  /** Rendered last, as a list of links. */
+  links?: LegalLink[];
 }
 export interface LegalDoc {
   updated: string;
@@ -22,47 +39,41 @@ export interface LegalDoc {
 
 export const LEGAL_UPDATED = '2026-09-24';
 
-const GH = 'https://github.com/TrekLink-Team';
+const MAIL = `mailto:${siteConfig.contactEmail}`;
+const REPO_ISSUES = 'https://github.com/TrekLink-Team/TrekLink-Team.github.io/issues';
+const CLOUDFLARE_PRIVACY = 'https://www.cloudflare.com/privacypolicy/';
+const GITHUB_PRIVACY =
+  'https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement';
+const MESHTASTIC = 'https://meshtastic.org/';
 
 export const privacy: Record<Locale, LegalDoc> = {
   en: {
     updated: LEGAL_UPDATED,
     intro:
-      'This policy covers the TrekLink landing site only. It has no forms, no accounts and no sign-in, so it never asks for your name, email or location.',
+      'This policy covers the TrekLink landing site only. The site has no forms, no accounts and no sign-in, and it never asks for your name, email or location. Visiting it still involves a small amount of personal data, such as your IP address reaching our hosting and analytics providers. This page says what that data is, who handles it and what you can do about it.',
     sections: [
       {
         id: 'who',
-        heading: 'Who runs this site',
+        heading: 'Who is responsible',
         body: [
-          'TrekLink is FPT University capstone project FA26SE159. The site is a set of static pages hosted on GitHub Pages.',
-          `To reach the team, open an issue in the TrekLink GitHub organisation at ${GH}.`,
+          'The TrekLink team, the student team behind FPT University capstone project FA26SE159, decides how this site processes personal data. The team is not a company.',
+          'For any question or request about your personal data, email us. Please do not use GitHub issues for anything personal: issues are public.',
         ],
+        links: [{ label: siteConfig.contactEmail, href: MAIL }],
       },
       {
-        id: 'analytics',
-        heading: 'Analytics',
+        id: 'data',
+        heading: 'What is processed, and why',
         body: [
-          'We use Cloudflare Web Analytics to count visits. It sets no cookies and does not use your IP address to follow you across sites.',
-          'It records aggregate data about each page view, such as the page, the referring site, the browser and operating system, and the country. We see totals, not individuals.',
+          'Each item below names the data, the purpose and who handles it. We use none of it for advertising, profiling or automated decisions about you, and we never sell it.',
         ],
-        list: ['Cloudflare privacy policy: https://www.cloudflare.com/privacypolicy/'],
-      },
-      {
-        id: 'hosting',
-        heading: 'Hosting logs',
-        body: [
-          'GitHub serves these pages and may log technical data such as IP addresses to keep the service secure. That processing is covered by the GitHub Privacy Statement.',
+        list: [
+          'Hosting: when your browser requests a page, GitHub Pages receives your IP address, browser details and the address you asked for, in order to deliver the page and keep the service secure. GitHub handles this under its own privacy statement.',
+          'Analytics: Cloudflare Web Analytics counts page views. It records the page, the referring site, the browser, the operating system, the device type and the country. Cloudflare states that it sets no cookies and does not use your IP address to track you. We see only totals, never individual visitors.',
+          'Settings in your browser: your language and theme choices are stored in your browser, under treklink.locale and treklink.theme. They never leave your device.',
+          'Operations system check: when you press a link into the operations system, your browser asks that system whether it is available. The request goes from your browser directly to that system, which may log it.',
+          'Email: if you email us, we receive your address and your message, and use them only to answer you.',
         ],
-        list: ['GitHub Privacy Statement: https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement'],
-      },
-      {
-        id: 'browser',
-        heading: 'What stays in your browser',
-        body: [
-          'Two preferences are saved in your browser’s local storage so the site remembers them. They never leave your device.',
-          'You can delete them at any time by clearing this site’s data in your browser settings.',
-        ],
-        list: ['treklink.locale: the language you chose', 'treklink.theme: light or dark theme'],
       },
       {
         id: 'links',
@@ -73,18 +84,46 @@ export const privacy: Record<Locale, LegalDoc> = {
         ],
       },
       {
-        id: 'ops',
-        heading: 'The operations system',
+        id: 'retention',
+        heading: 'How long it is kept',
         body: [
-          'The operations system is a separate service with its own terms. When you press its link, your browser first asks that system whether it is available. That request goes from your browser to the operations system, which may log it.',
+          'We keep no copy of hosting logs or analytics records. The analytics dashboard shows us aggregate totals only. GitHub and Cloudflare keep their own records for the periods set out in their privacy policies.',
+          'Emails are kept only as long as we need them to handle your request, and are then deleted.',
+        ],
+      },
+      {
+        id: 'transfer',
+        heading: 'Processing outside Vietnam',
+        body: [
+          'GitHub and Cloudflare are based in the United States and serve pages and scripts from locations around the world, so data about your visit is processed outside Vietnam. Each applies its own safeguards, described in its privacy policy.',
+        ],
+        links: [
+          { label: 'GitHub Privacy Statement', href: GITHUB_PRIVACY },
+          { label: 'Cloudflare privacy policy', href: CLOUDFLARE_PRIVACY },
         ],
       },
       {
         id: 'rights',
-        heading: 'Your choices',
+        heading: 'Your rights',
         body: [
-          'This site holds no personal data about you, so there is nothing for us to export or delete. You can block analytics with any content blocker and the site keeps working.',
-          'For data held by Cloudflare or GitHub, contact them directly. For anything else, open an issue and we will help.',
+          'Under Vietnamese law you have the right to:',
+          'Email us to use any of these rights. We will reply within the time the law requires. Where the data is held by GitHub or Cloudflare rather than by us, we will tell you so and help you reach them. You can also block the analytics script with any content blocker; the site keeps working.',
+        ],
+        list: [
+          'be told how your personal data is processed',
+          'agree or refuse to agree to its processing, and withdraw your agreement at any time',
+          'see your personal data, and have it corrected',
+          'have it deleted, or its processing restricted',
+          'object to its processing',
+          'complain, report a violation, and ask the competent authority, the Ministry of Public Security, to protect your data',
+        ],
+        links: [{ label: siteConfig.contactEmail, href: MAIL }],
+      },
+      {
+        id: 'language',
+        heading: 'Language',
+        body: [
+          'This policy is published in Vietnamese and English. If the two versions differ, the Vietnamese version prevails.',
         ],
       },
       {
@@ -97,41 +136,30 @@ export const privacy: Record<Locale, LegalDoc> = {
   vi: {
     updated: LEGAL_UPDATED,
     intro:
-      'Chính sách này chỉ áp dụng cho trang giới thiệu TrekLink. Trang không có biểu mẫu, tài khoản hay đăng nhập, nên không bao giờ hỏi tên, email hay vị trí của bạn.',
+      'Chính sách này chỉ áp dụng cho trang giới thiệu TrekLink. Trang không có biểu mẫu, tài khoản hay đăng nhập, và không bao giờ hỏi tên, email hay vị trí của bạn. Tuy vậy, việc truy cập trang vẫn liên quan đến một lượng nhỏ dữ liệu cá nhân, chẳng hạn địa chỉ IP của bạn được gửi tới các nhà cung cấp dịch vụ lưu trữ và phân tích của chúng tôi. Trang này cho biết đó là dữ liệu gì, ai xử lý và bạn có thể làm gì.',
     sections: [
       {
         id: 'who',
-        heading: 'Ai vận hành trang này',
+        heading: 'Ai chịu trách nhiệm',
         body: [
-          'TrekLink là đồ án tốt nghiệp FA26SE159 của Đại học FPT. Trang gồm các trang tĩnh được lưu trữ trên GitHub Pages.',
-          `Để liên hệ nhóm, hãy tạo một issue trong tổ chức TrekLink trên GitHub tại ${GH}.`,
+          'Nhóm TrekLink, nhóm sinh viên thực hiện đồ án tốt nghiệp FA26SE159 của Đại học FPT, quyết định cách trang này xử lý dữ liệu cá nhân. Nhóm không phải là một doanh nghiệp.',
+          'Với mọi câu hỏi hoặc yêu cầu về dữ liệu cá nhân của bạn, hãy gửi email cho chúng tôi. Vui lòng không dùng issue trên GitHub cho các vấn đề cá nhân: issue được công khai.',
         ],
+        links: [{ label: siteConfig.contactEmail, href: MAIL }],
       },
       {
-        id: 'analytics',
-        heading: 'Phân tích truy cập',
+        id: 'data',
+        heading: 'Dữ liệu được xử lý và mục đích',
         body: [
-          'Chúng tôi dùng Cloudflare Web Analytics để đếm lượt truy cập. Công cụ này không đặt cookie và không dùng địa chỉ IP để theo dõi bạn giữa các trang web.',
-          'Công cụ ghi lại dữ liệu tổng hợp của mỗi lượt xem trang, như trang đã xem, trang giới thiệu, trình duyệt, hệ điều hành và quốc gia. Chúng tôi chỉ thấy số liệu tổng, không thấy từng cá nhân.',
+          'Mỗi mục dưới đây nêu dữ liệu, mục đích và bên xử lý. Chúng tôi không dùng dữ liệu nào cho quảng cáo, lập hồ sơ hay ra quyết định tự động về bạn, và không bao giờ bán dữ liệu.',
         ],
-        list: ['Chính sách quyền riêng tư của Cloudflare: https://www.cloudflare.com/privacypolicy/'],
-      },
-      {
-        id: 'hosting',
-        heading: 'Nhật ký máy chủ',
-        body: [
-          'GitHub phục vụ các trang này và có thể ghi lại dữ liệu kỹ thuật như địa chỉ IP để bảo đảm an toàn dịch vụ. Việc xử lý đó tuân theo Tuyên bố quyền riêng tư của GitHub.',
+        list: [
+          'Lưu trữ trang: khi trình duyệt của bạn yêu cầu một trang, GitHub Pages nhận địa chỉ IP, thông tin trình duyệt và địa chỉ trang bạn yêu cầu, để phục vụ trang và bảo đảm an toàn dịch vụ. GitHub xử lý dữ liệu này theo tuyên bố quyền riêng tư của mình.',
+          'Phân tích truy cập: Cloudflare Web Analytics đếm lượt xem trang. Công cụ ghi lại trang đã xem, trang giới thiệu, trình duyệt, hệ điều hành, loại thiết bị và quốc gia. Cloudflare cho biết công cụ không đặt cookie và không dùng địa chỉ IP để theo dõi bạn. Chúng tôi chỉ thấy số liệu tổng, không bao giờ thấy từng người truy cập.',
+          'Cài đặt trong trình duyệt: lựa chọn ngôn ngữ và giao diện của bạn được lưu trong trình duyệt, với tên treklink.locale và treklink.theme. Chúng không bao giờ rời khỏi thiết bị của bạn.',
+          'Kiểm tra hệ thống vận hành: khi bạn bấm liên kết vào hệ thống vận hành, trình duyệt của bạn sẽ hỏi hệ thống đó xem có đang hoạt động không. Yêu cầu này đi thẳng từ trình duyệt của bạn tới hệ thống đó, và hệ thống có thể ghi lại yêu cầu.',
+          'Email: nếu bạn gửi email cho chúng tôi, chúng tôi nhận địa chỉ email và nội dung thư của bạn, và chỉ dùng chúng để trả lời bạn.',
         ],
-        list: ['Tuyên bố quyền riêng tư của GitHub: https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement'],
-      },
-      {
-        id: 'browser',
-        heading: 'Dữ liệu lưu trong trình duyệt của bạn',
-        body: [
-          'Hai tùy chọn được lưu trong bộ nhớ cục bộ của trình duyệt để trang ghi nhớ lựa chọn của bạn. Chúng không bao giờ rời khỏi thiết bị của bạn.',
-          'Bạn có thể xóa chúng bất cứ lúc nào bằng cách xóa dữ liệu của trang này trong cài đặt trình duyệt.',
-        ],
-        list: ['treklink.locale: ngôn ngữ bạn đã chọn', 'treklink.theme: giao diện sáng hoặc tối'],
       },
       {
         id: 'links',
@@ -142,18 +170,46 @@ export const privacy: Record<Locale, LegalDoc> = {
         ],
       },
       {
-        id: 'ops',
-        heading: 'Hệ thống vận hành',
+        id: 'retention',
+        heading: 'Thời gian lưu giữ',
         body: [
-          'Hệ thống vận hành là một dịch vụ riêng với điều khoản riêng. Khi bạn bấm liên kết tới hệ thống, trình duyệt của bạn sẽ hỏi hệ thống đó xem có đang hoạt động không. Yêu cầu này đi từ trình duyệt của bạn tới hệ thống vận hành, và hệ thống có thể ghi lại yêu cầu đó.',
+          'Chúng tôi không giữ bản sao nào của nhật ký máy chủ hay dữ liệu phân tích. Bảng điều khiển phân tích chỉ cho chúng tôi thấy số liệu tổng hợp. GitHub và Cloudflare lưu giữ dữ liệu của họ trong thời hạn nêu tại chính sách quyền riêng tư của họ.',
+          'Email chỉ được giữ trong thời gian cần thiết để xử lý yêu cầu của bạn, sau đó sẽ bị xóa.',
+        ],
+      },
+      {
+        id: 'transfer',
+        heading: 'Xử lý dữ liệu ngoài Việt Nam',
+        body: [
+          'GitHub và Cloudflare có trụ sở tại Hoa Kỳ và phục vụ trang cũng như mã chạy trên trang từ nhiều địa điểm trên thế giới, vì vậy dữ liệu về lượt truy cập của bạn được xử lý bên ngoài Việt Nam. Mỗi bên áp dụng biện pháp bảo vệ riêng, được mô tả trong chính sách quyền riêng tư của họ.',
+        ],
+        links: [
+          { label: 'Tuyên bố quyền riêng tư của GitHub', href: GITHUB_PRIVACY },
+          { label: 'Chính sách quyền riêng tư của Cloudflare', href: CLOUDFLARE_PRIVACY },
         ],
       },
       {
         id: 'rights',
-        heading: 'Lựa chọn của bạn',
+        heading: 'Quyền của bạn',
         body: [
-          'Trang này không lưu dữ liệu cá nhân nào về bạn, nên chúng tôi không có gì để xuất hay xóa. Bạn có thể chặn công cụ phân tích bằng bất kỳ trình chặn nội dung nào và trang vẫn hoạt động bình thường.',
-          'Với dữ liệu do Cloudflare hoặc GitHub lưu giữ, vui lòng liên hệ trực tiếp với họ. Với các vấn đề khác, hãy tạo một issue và chúng tôi sẽ hỗ trợ.',
+          'Theo pháp luật Việt Nam, bạn có quyền:',
+          'Hãy gửi email cho chúng tôi để thực hiện bất kỳ quyền nào trong số này. Chúng tôi sẽ trả lời trong thời hạn pháp luật quy định. Nếu dữ liệu do GitHub hoặc Cloudflare nắm giữ chứ không phải chúng tôi, chúng tôi sẽ cho bạn biết và giúp bạn liên hệ với họ. Bạn cũng có thể chặn mã phân tích bằng bất kỳ trình chặn nội dung nào; trang vẫn hoạt động bình thường.',
+        ],
+        list: [
+          'được biết dữ liệu cá nhân của mình được xử lý như thế nào',
+          'đồng ý hoặc không đồng ý với việc xử lý, và rút lại sự đồng ý bất cứ lúc nào',
+          'xem dữ liệu cá nhân của mình, và yêu cầu chỉnh sửa',
+          'yêu cầu xóa dữ liệu, hoặc hạn chế việc xử lý',
+          'phản đối việc xử lý',
+          'khiếu nại, tố cáo vi phạm, và yêu cầu cơ quan có thẩm quyền là Bộ Công an bảo vệ dữ liệu của mình',
+        ],
+        links: [{ label: siteConfig.contactEmail, href: MAIL }],
+      },
+      {
+        id: 'language',
+        heading: 'Ngôn ngữ',
+        body: [
+          'Chính sách này được công bố bằng tiếng Việt và tiếng Anh. Nếu hai bản có nội dung khác nhau, bản tiếng Việt được ưu tiên áp dụng.',
         ],
       },
       {
@@ -175,14 +231,14 @@ export const terms: Record<Locale, LegalDoc> = {
         id: 'about',
         heading: 'What this site is',
         body: [
-          'An information site for TrekLink, FPT University capstone project FA26SE159. Nothing is sold through it, and it takes no payments.',
+          'An information site for TrekLink, FPT University capstone project FA26SE159, run by its student team. Nothing is sold through it, and it takes no payments.',
         ],
       },
       {
         id: 'safety',
         heading: 'Not a guarantee of rescue',
         body: [
-          'TrekLink is under active development. The hardware and features described here are prototypes and may change.',
+          'TrekLink is under active development. The hardware and features described here are prototypes and may change. A radio mesh can lose messages or deliver them late: terrain, range, batteries and weather all affect it.',
           'Do not rely on TrekLink, or on anything on this site, as your only way to call for help. Carry the safety equipment your route requires, file a route plan, and follow the guidance of local authorities.',
         ],
       },
@@ -202,36 +258,51 @@ export const terms: Record<Locale, LegalDoc> = {
       },
       {
         id: 'ip',
-        heading: 'Content and code',
+        heading: 'Content, marks and code',
         body: [
-          'Text, photographs and the TrekLink name and mark on this site belong to the TrekLink team. Source code in the TrekLink GitHub repositories is governed by the licence in each repository.',
-          'The Oswald and Manrope typefaces are used under the SIL Open Font License.',
+          'The text on this site and the TrekLink name and mark belong to the TrekLink team. The product images are renders created from photographs of the team’s prototypes, not unedited photographs.',
+          'Other names and marks belong to their owners and are used only to identify their products. Meshtastic® is a registered trademark of Meshtastic LLC; this site is not affiliated with or endorsed by the Meshtastic project. LilyGO and T-Beam are names of LilyGO products. FPT University is named only to identify the programme this project belongs to.',
+          'Source code in the TrekLink GitHub repositories is governed by the licence in each repository. The Oswald and Manrope typefaces are used under the SIL Open Font License.',
         ],
+        links: [{ label: 'meshtastic.org', href: MESHTASTIC }],
       },
       {
         id: 'external',
         heading: 'Other sites',
         body: [
-          'Links to GitHub, Cloudflare and other sites are provided for reference. We are not responsible for their content or practices.',
+          'Links to GitHub, Cloudflare, Meshtastic and other sites are provided for reference. We are not responsible for their content or practices.',
         ],
       },
       {
         id: 'warranty',
         heading: 'No warranty, limited liability',
         body: [
-          'The site and its content are provided as they are, without any warranty. To the extent the law allows, the TrekLink team is not liable for any loss arising from use of the site or reliance on its content.',
+          'The site and its content are provided as they are, without any warranty. To the extent the law allows, the TrekLink team is not liable for any loss arising from use of the site or reliance on its content. Nothing in these terms limits a right you have under Vietnamese law that cannot be limited by agreement.',
         ],
       },
       {
         id: 'law',
-        heading: 'Governing law',
-        body: ['These terms are governed by the laws of Vietnam.'],
+        heading: 'Governing law and disputes',
+        body: [
+          'These terms are governed by the laws of Vietnam. If a dispute arises, please contact us first so we can try to resolve it together. A dispute that cannot be resolved that way goes to a competent court of Vietnam.',
+        ],
+      },
+      {
+        id: 'language',
+        heading: 'Language',
+        body: [
+          'These terms are published in Vietnamese and English. If the two versions differ, the Vietnamese version prevails.',
+        ],
       },
       {
         id: 'changes',
         heading: 'Changes and contact',
         body: [
-          `If these terms change, the date at the top of the page changes with it. Questions: open an issue at ${GH}.`,
+          'If these terms change, the date at the top of the page changes with it. Legal questions go to our email address. General questions about the site can also be raised as a public issue on its repository.',
+        ],
+        links: [
+          { label: siteConfig.contactEmail, href: MAIL },
+          { label: 'Site issues on GitHub', href: REPO_ISSUES },
         ],
       },
     ],
@@ -245,14 +316,14 @@ export const terms: Record<Locale, LegalDoc> = {
         id: 'about',
         heading: 'Trang này là gì',
         body: [
-          'Đây là trang thông tin về TrekLink, đồ án tốt nghiệp FA26SE159 của Đại học FPT. Trang không bán sản phẩm và không nhận thanh toán.',
+          'Đây là trang thông tin về TrekLink, đồ án tốt nghiệp FA26SE159 của Đại học FPT, do nhóm sinh viên thực hiện đồ án vận hành. Trang không bán sản phẩm và không nhận thanh toán.',
         ],
       },
       {
         id: 'safety',
         heading: 'Không bảo đảm việc cứu hộ',
         body: [
-          'TrekLink đang trong quá trình phát triển. Phần cứng và tính năng được mô tả ở đây là nguyên mẫu và có thể thay đổi.',
+          'TrekLink đang trong quá trình phát triển. Phần cứng và tính năng được mô tả ở đây là nguyên mẫu và có thể thay đổi. Mạng lưới vô tuyến có thể làm mất tin nhắn hoặc gửi chậm: địa hình, tầm phủ sóng, pin và thời tiết đều có ảnh hưởng.',
           'Đừng dựa vào TrekLink, hay bất cứ nội dung nào trên trang này, như cách duy nhất để kêu gọi trợ giúp. Hãy mang theo thiết bị an toàn mà cung đường yêu cầu, đăng ký lộ trình và tuân theo hướng dẫn của chính quyền địa phương.',
         ],
       },
@@ -272,36 +343,51 @@ export const terms: Record<Locale, LegalDoc> = {
       },
       {
         id: 'ip',
-        heading: 'Nội dung và mã nguồn',
+        heading: 'Nội dung, nhãn hiệu và mã nguồn',
         body: [
-          'Văn bản, hình ảnh cùng tên và biểu tượng TrekLink trên trang này thuộc về nhóm TrekLink. Mã nguồn trong các kho TrekLink trên GitHub tuân theo giấy phép của từng kho.',
-          'Kiểu chữ Oswald và Manrope được sử dụng theo Giấy phép Phông chữ Mở SIL.',
+          'Văn bản trên trang này cùng tên và biểu tượng TrekLink thuộc về nhóm TrekLink. Hình ảnh sản phẩm là ảnh dựng được tạo từ ảnh chụp các nguyên mẫu của nhóm, không phải ảnh chụp chưa qua chỉnh sửa.',
+          'Các tên và nhãn hiệu khác thuộc về chủ sở hữu tương ứng và chỉ được dùng để chỉ sản phẩm của họ. Meshtastic® là nhãn hiệu đã đăng ký của Meshtastic LLC; trang này không liên kết với và không được dự án Meshtastic xác nhận. LilyGO và T-Beam là tên sản phẩm của LilyGO. Tên Đại học FPT chỉ được nêu để xác định chương trình mà đồ án này thuộc về.',
+          'Mã nguồn trong các kho TrekLink trên GitHub tuân theo giấy phép của từng kho. Kiểu chữ Oswald và Manrope được sử dụng theo Giấy phép Phông chữ Mở SIL.',
         ],
+        links: [{ label: 'meshtastic.org', href: MESHTASTIC }],
       },
       {
         id: 'external',
         heading: 'Trang web khác',
         body: [
-          'Các liên kết tới GitHub, Cloudflare và trang web khác chỉ để tham khảo. Chúng tôi không chịu trách nhiệm về nội dung hay cách vận hành của các trang đó.',
+          'Các liên kết tới GitHub, Cloudflare, Meshtastic và trang web khác chỉ để tham khảo. Chúng tôi không chịu trách nhiệm về nội dung hay cách vận hành của các trang đó.',
         ],
       },
       {
         id: 'warranty',
         heading: 'Không bảo hành, giới hạn trách nhiệm',
         body: [
-          'Trang và nội dung được cung cấp nguyên trạng, không kèm bất kỳ bảo hành nào. Trong phạm vi pháp luật cho phép, nhóm TrekLink không chịu trách nhiệm cho bất kỳ tổn thất nào phát sinh từ việc sử dụng trang hoặc dựa vào nội dung của trang.',
+          'Trang và nội dung được cung cấp nguyên trạng, không kèm bất kỳ bảo hành nào. Trong phạm vi pháp luật cho phép, nhóm TrekLink không chịu trách nhiệm cho bất kỳ tổn thất nào phát sinh từ việc sử dụng trang hoặc dựa vào nội dung của trang. Không điều khoản nào ở đây hạn chế quyền của bạn theo pháp luật Việt Nam mà không thể bị hạn chế bằng thỏa thuận.',
         ],
       },
       {
         id: 'law',
-        heading: 'Luật áp dụng',
-        body: ['Các điều khoản này được điều chỉnh bởi pháp luật Việt Nam.'],
+        heading: 'Luật áp dụng và giải quyết tranh chấp',
+        body: [
+          'Các điều khoản này được điều chỉnh bởi pháp luật Việt Nam. Khi phát sinh tranh chấp, vui lòng liên hệ với chúng tôi trước để cùng tìm cách giải quyết. Tranh chấp không giải quyết được bằng cách đó sẽ được đưa ra tòa án có thẩm quyền của Việt Nam.',
+        ],
+      },
+      {
+        id: 'language',
+        heading: 'Ngôn ngữ',
+        body: [
+          'Các điều khoản này được công bố bằng tiếng Việt và tiếng Anh. Nếu hai bản có nội dung khác nhau, bản tiếng Việt được ưu tiên áp dụng.',
+        ],
       },
       {
         id: 'changes',
         heading: 'Thay đổi và liên hệ',
         body: [
-          `Nếu các điều khoản thay đổi, ngày ở đầu trang cũng thay đổi theo. Mọi câu hỏi: hãy tạo một issue tại ${GH}.`,
+          'Nếu các điều khoản thay đổi, ngày ở đầu trang cũng thay đổi theo. Câu hỏi pháp lý vui lòng gửi tới địa chỉ email của chúng tôi. Câu hỏi chung về trang cũng có thể được nêu dưới dạng issue công khai trên kho mã của trang.',
+        ],
+        links: [
+          { label: siteConfig.contactEmail, href: MAIL },
+          { label: 'Issue của trang trên GitHub', href: REPO_ISSUES },
         ],
       },
     ],

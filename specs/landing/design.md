@@ -139,6 +139,7 @@ the keyboard, and announces item changes through a live region (REQ-EVT-07).
 | `operationsUrl` | Where the header link goes | placeholder until the backend is deployed, open question Q1 |
 | `healthEndpoint` | What the availability check requests | placeholder, Q1 |
 | `healthTimeoutMs` | Abort threshold | `3000` |
+| `contactEmail` | Private address for privacy and legal requests, named in both legal pages | `treklink.team@gmail.com`, Q4 |
 | `analyticsToken` | Cloudflare Web Analytics site token | empty string until the leader supplies it. Empty means the beacon is not rendered at all, phase 5 |
 | `site` | Canonical origin, used for absolute URLs | `https://treklink-team.github.io` |
 
@@ -230,10 +231,22 @@ reviewed the same way and kept as shipped.
 
 ### 5.4 Imagery
 
-`public/images/products/` holds the real photographs, supplied by the leader. Until each arrives,
+`public/images/products/` holds the product images, supplied by the leader. Until each arrives,
 `public/images/placeholders/` holds a typographic stand-in at the identical aspect ratio, so that
-layout is final before the photograph exists (REQ-OPT-02, question 79). Swapping one in is a file
-drop, never a code change (AC-08).
+layout is final before the image exists (REQ-OPT-02, question 79). Swapping one in is a file
+drop plus one line in `src/lib/media.ts`, never a layout change (AC-08).
+
+Every slot in `src/lib/media.ts` declares its kind: `photo`, `render` or `placeholder`. The node,
+line-up and board images shipped in PR #10 are AI-regenerated renders of the prototypes (their
+working originals carry OpenAI C2PA manifests), so they are `render`, their alt text begins
+"Render:", the nodes section carries a visible note, and the Terms say so. A render is never
+presented as a photograph.
+
+Third-party marks live in `brandMedia`, apart from product imagery, because their owners' terms
+govern them. The Meshtastic "M-Powered" logo is shown unaltered, hyperlinked to meshtastic.org,
+with the registered-trademark attribution and non-affiliation notice as its caption.
+
+Source originals stay out of the repository (see `.gitignore`).
 
 ---
 
