@@ -1,0 +1,241 @@
+---
+import { useTranslations, type Locale, type TranslationKey } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const steps = (['a', 'b', 'c'] as const).map((k, i) => ({
+  n: String(i + 1).padStart(2, '0'),
+  title: t(`how.${k}.title` as TranslationKey),
+  body: t(`how.${k}.body` as TranslationKey),
+}));
+
+/* The route: carrier, two relaying handsets, basecamp. */
+const PATH = 'M60 190 L230 90 L400 170 L570 70 L720 150';
+const nodes = [
+  { x: 60, y: 190, label: t('how.node.carrier'), kind: 'sos' },
+  { x: 230, y: 90, label: t('how.node.handset'), kind: 'hop' },
+  { x: 400, y: 170, label: t('how.node.handset'), kind: 'hop' },
+  { x: 570, y: 70, label: t('how.node.handset'), kind: 'hop' },
+  { x: 720, y: 150, label: t('how.node.basecamp'), kind: 'base' },
+];
+---
+
+<section class="section how grain" id="how" aria-labelledby="how-heading">
+  <div class="glow glow-moss how-glow" aria-hidden="true"></div>
+  <div class="shell above">
+    <header class="section-head" data-reveal>
+      <p class="eyebrow">{t('how.eyebrow')}</p>
+      <h2 id="how-heading">{t('how.heading')}</h2>
+    </header>
+
+    <div class="route glass" data-reveal data-loop>
+      <span class="chip route-proof"><b>{t('proof.towers.value')}</b> {t('how.proof')}</span>
+      <svg
+        viewBox="0 0 780 250"
+        role="img"
+        aria-label={t('how.diagram.label')}
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <path class="route-line" d={PATH}></path>
+        <path class="route-trail" d={PATH} pathLength="1"></path>
+        {
+          nodes.map((n) => (
+            <g class={`node node-${n.kind}`}>
+              <circle class="node-halo" cx={n.x} cy={n.y} r="26" />
+              <circle class="node-core" cx={n.x} cy={n.y} r="8" />
+              <text x={n.x} y={n.y + 48} text-anchor="middle">
+                {n.label}
+              </text>
+            </g>
+          ))
+        }
+        <circle class="packet" r="7" style={`offset-path: path('${PATH}')`}></circle>
+      </svg>
+    </div>
+
+    <ol class="steps">
+      {
+        steps.map((s, i) => (
+          <li class="step" data-reveal style={`--i:${i}`}>
+            <span class="step-n" aria-hidden="true">
+              {s.n}
+            </span>
+            <h3>{s.title}</h3>
+            <p>{s.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .how {
+    position: relative;
+    overflow: clip;
+  }
+  .how-glow {
+    width: 60rem;
+    height: 40rem;
+    right: -20rem;
+    top: 10%;
+  }
+
+  .route {
+    margin-top: clamp(2rem, 1.4rem + 2.6vw, 3.2rem);
+    padding: clamp(1rem, 0.6rem + 2vw, 2rem);
+    position: relative;
+  }
+  .route-proof {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1;
+  }
+  .route svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .route-line {
+    fill: none;
+    stroke: var(--moss-deep);
+    stroke-width: 2;
+    stroke-dasharray: 6 9;
+  }
+  .route-trail {
+    fill: none;
+    stroke: var(--brass);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+  .node-halo {
+    fill: var(--surface-base);
+    stroke: var(--moss);
+    stroke-width: 2;
+  }
+  .node-core {
+    fill: var(--moss);
+  }
+  .node-sos .node-halo {
+    stroke: var(--brass);
+  }
+  .node-sos .node-core,
+  .node-base .node-core {
+    fill: var(--brass);
+  }
+  .node-base .node-halo {
+    stroke: var(--brass);
+    stroke-width: 3;
+  }
+  .node text {
+    fill: var(--ink-muted);
+    font: 700 13px var(--font-body);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .packet {
+    fill: var(--brass-lit);
+    offset-distance: 100%;
+    offset-rotate: 0deg;
+    filter: drop-shadow(0 0 6px var(--brass-glow));
+  }
+
+  .steps {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .step {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+    padding: 1.2rem 0.2rem 0;
+    border-top: 2px solid var(--surface-ridge);
+  }
+  .step-n {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step-1);
+    color: var(--brass);
+  }
+  .step h3 {
+    font-size: var(--step-2);
+  }
+  .step p {
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  /*
+   * Motion. With scroll-driven animations the SOS travels the route as the
+   * section scrolls through the viewport, and the brass trail draws behind
+   * it. Elsewhere it loops while the diagram is on screen. Reduced motion:
+   * the packet rests at basecamp and the trail is drawn in full.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .route[data-running] .packet {
+      animation: travel 3.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+    }
+    .route[data-running] .route-trail {
+      animation: trail 3.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+    }
+    @supports (animation-timeline: view()) {
+      .route {
+        view-timeline-name: --route;
+      }
+      .route .packet,
+      .route[data-running] .packet {
+        animation: travel linear both;
+        animation-timeline: --route;
+        animation-range: cover 20% cover 70%;
+      }
+      .route .route-trail,
+      .route[data-running] .route-trail {
+        animation: trail linear both;
+        animation-timeline: --route;
+        animation-range: cover 20% cover 70%;
+      }
+    }
+  }
+  @keyframes travel {
+    from {
+      offset-distance: 0%;
+    }
+    to {
+      offset-distance: 100%;
+    }
+  }
+  @keyframes trail {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (max-width: 799px) {
+    .steps {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .route-proof {
+      position: static;
+      margin-bottom: 0.5rem;
+    }
+    .node text {
+      font-size: 17px;
+    }
+  }
+</style>

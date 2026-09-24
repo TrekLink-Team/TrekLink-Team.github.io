@@ -1,0 +1,155 @@
+---
+import { useTranslations, type Locale, type TranslationKey } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+/*
+ * The research work, told as what the trip organiser gets. Three benefits,
+ * each with its proof beside it. No metric appears here because none has
+ * been measured yet.
+ */
+const items = (['a', 'b', 'c'] as const).map((k, i) => ({
+  n: String(i + 1).padStart(2, '0'),
+  title: t(`benefits.${k}.title` as TranslationKey),
+  body: t(`benefits.${k}.body` as TranslationKey),
+  proof: t(`benefits.${k}.proof` as TranslationKey),
+  tone: i === 1 ? 'moss' : 'brass',
+}));
+---
+
+<section class="section benefits grain" id="benefits" aria-labelledby="benefits-heading">
+  <div class="glow glow-brass benefits-glow" aria-hidden="true"></div>
+  <div class="shell above">
+    <header class="section-head" data-reveal>
+      <p class="eyebrow">{t('benefits.eyebrow')}</p>
+      <h2 id="benefits-heading">{t('benefits.heading')}</h2>
+    </header>
+
+    <ul class="bento">
+      {
+        items.map((it, i) => (
+          <li class={`tile glass tone-${it.tone} tile-${i}`} data-reveal style={`--i:${i}`}>
+            <span class="tile-n" aria-hidden="true">
+              {it.n}
+            </span>
+            <h3>{it.title}</h3>
+            <p>{it.body}</p>
+            <span class="tile-proof">{it.proof}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .benefits {
+    position: relative;
+    overflow: clip;
+  }
+  .benefits-glow {
+    width: 56rem;
+    height: 40rem;
+    left: -18rem;
+    top: 20%;
+  }
+
+  .bento {
+    list-style: none;
+    margin: clamp(2rem, 1.4rem + 2.6vw, 3.2rem) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto;
+    gap: 1rem;
+  }
+  /* Asymmetric: the first benefit is the one a buyer asks about first. */
+  .tile-0 {
+    grid-row: span 2;
+  }
+
+  .tile {
+    display: grid;
+    align-content: start;
+    gap: 0.8rem;
+    padding: clamp(1.3rem, 1rem + 1.4vw, 2.2rem);
+    transition:
+      transform var(--dur-spring) var(--spring),
+      border-color var(--dur) var(--ease);
+  }
+  .tile:hover {
+    transform: translateY(-4px);
+  }
+  .tone-brass {
+    background-image: linear-gradient(155deg, var(--brass-tint), transparent 70%);
+  }
+  .tone-brass:hover {
+    border-color: var(--brass);
+  }
+  .tone-moss {
+    background-image: linear-gradient(155deg, var(--moss-tint), transparent 70%);
+  }
+  .tone-moss:hover {
+    border-color: var(--moss);
+  }
+
+  .tile-n {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step-2);
+    line-height: 1;
+  }
+  .tone-brass .tile-n {
+    color: var(--brass);
+  }
+  .tone-moss .tile-n {
+    color: var(--moss);
+  }
+  .tile h3 {
+    font-size: var(--step-2);
+    max-width: 18ch;
+  }
+  .tile-0 h3 {
+    font-size: var(--step-3);
+  }
+  .tile p {
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 40ch;
+  }
+  .tile-proof {
+    justify-self: start;
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.6rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid currentColor;
+  }
+  .tone-brass .tile-proof {
+    color: var(--brass-lit);
+  }
+  .tone-moss .tile-proof {
+    color: var(--moss-lit);
+  }
+  .tile-0 {
+    align-content: end;
+    min-height: 18rem;
+  }
+
+  @media (max-width: 759px) {
+    .bento {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .tile-0 {
+      grid-row: auto;
+      min-height: 0;
+    }
+  }
+</style>
