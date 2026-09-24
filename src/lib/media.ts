@@ -53,6 +53,9 @@ export const media = {
 
   /** The v2 board, assembled. */
   'pcb-v2': photo('/images/products/pcb-v2-angle.webp', 820, 719),
+
+  /** The Meshtastic logo, used under Meshtastic's trademark terms. */
+  'meshtastic': photo('/images/brand/meshtastic-powered.webp', 720, 480),
 } as const satisfies Record<string, MediaSlot>;
 
 export type MediaKey = keyof typeof media;

@@ -1,0 +1,175 @@
+---
+import { useTranslations, type Locale } from '../i18n';
+import { media } from '../lib/media';
+import { withUtm } from '../lib/utm';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+/*
+ * The mesh layer is Meshtastic. Every figure here is public: the licence is
+ * on the firmware repository, the contributor count and start year are in
+ * the project's public history. The trademark notice is required by
+ * Meshtastic's trademark terms and stays beside the logo.
+ */
+const proof = [
+  { v: t('mesh.proof.license.value'), l: t('mesh.proof.license') },
+  { v: t('mesh.proof.contrib.value'), l: t('mesh.proof.contrib') },
+  { v: t('mesh.proof.since.value'), l: t('mesh.proof.since') },
+];
+const adds = [t('mesh.add.a'), t('mesh.add.b'), t('mesh.add.c')];
+const link = withUtm('https://meshtastic.org/', { campaign: 'home', content: 'meshtastic' });
+---
+
+<section class="section meshtastic grain" id="meshtastic" aria-labelledby="mesh-heading">
+  <div class="glow glow-moss mt-glow" aria-hidden="true"></div>
+  <div class="shell above mt-grid">
+    <div class="mt-copy" data-reveal>
+      <p class="eyebrow">{t('mesh.eyebrow')}</p>
+      <h2 id="mesh-heading">{t('mesh.heading')}</h2>
+      <p class="lede">{t('mesh.body')}</p>
+      <ul class="mt-proof">
+        {
+          proof.map((p) => (
+            <li class="chip">
+              <b>{p.v}</b> {p.l}
+            </li>
+          ))
+        }
+      </ul>
+      <a class="btn btn-ghost" href={link} rel="noopener noreferrer">
+        {t('mesh.link')} <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <div class="mt-side" data-reveal style="--i:1">
+      <figure class="mt-logo">
+        <img
+          src={media.meshtastic.src}
+          alt={t('mesh.logo.alt')}
+          width={media.meshtastic.width}
+          height={media.meshtastic.height}
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
+      <div class="mt-adds glass">
+        <h3>{t('mesh.adds')}</h3>
+        <ul>
+          {adds.map((a) => <li>{a}</li>)}
+        </ul>
+      </div>
+    </div>
+
+    <p class="mt-legal">{t('mesh.disclaimer')}</p>
+  </div>
+</section>
+
+<style>
+  .meshtastic {
+    position: relative;
+    overflow: clip;
+  }
+  .mt-glow {
+    width: 56rem;
+    height: 40rem;
+    left: -16rem;
+    top: 10%;
+  }
+  .mt-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 1rem + 3vw, 4rem);
+    align-items: center;
+  }
+  .mt-copy {
+    display: grid;
+    gap: 1.1rem;
+    justify-items: start;
+  }
+  .mt-copy h2 {
+    font-size: var(--step-3);
+    max-width: 20ch;
+  }
+  .mt-proof {
+    list-style: none;
+    margin: 0.2rem 0 0.4rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .mt-side {
+    display: grid;
+    gap: 1rem;
+  }
+  /* The logo keeps its own green ground, unaltered, as the mark requires. */
+  .mt-logo {
+    margin: 0;
+    background: var(--meshtastic-green);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-glass);
+    transition: transform var(--dur-spring) var(--spring);
+  }
+  .mt-logo:hover {
+    transform: translateY(-3px) rotate(-0.6deg);
+  }
+  .mt-logo {
+    display: grid;
+    place-items: center;
+    padding: 1.2rem;
+  }
+  .mt-logo img {
+    width: min(100%, 17rem);
+    height: auto;
+  }
+  .mt-adds {
+    padding: 1.2rem 1.3rem;
+    display: grid;
+    gap: 0.7rem;
+  }
+  .mt-adds h3 {
+    font-size: var(--step-1);
+    letter-spacing: 0.06em;
+    color: var(--brass);
+  }
+  .mt-adds ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .mt-adds li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.7rem;
+    align-items: baseline;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .mt-adds li::before {
+    content: '';
+    width: 0.55rem;
+    height: 0.55rem;
+    background: var(--moss);
+    transform: rotate(45deg) translateY(-0.1rem);
+  }
+  .mt-legal {
+    grid-column: 1 / -1;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    max-width: 80ch;
+  }
+
+  @media (max-width: 859px) {
+    .mt-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
