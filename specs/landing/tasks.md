@@ -60,6 +60,7 @@ phase 4 or the accessibility work in phase 7.
 - [x] 3.2 `Hero`, the product advert. One photograph, headline, subheadline. No system call to
       action in the hero; it lives in the header
   - _Requirements: REQ-EVT-01_
+  - Superseded 2026-11-01 by 6.6: the hero now carries a system link.
 - [x] 3.3 `Problem`, written for a general reader
   - _Requirements: none, content_
 - [x] 3.4 `NodeLines`, the card grid that feeds the carousel
@@ -117,6 +118,15 @@ phase 4 or the accessibility work in phase 7.
   - PR #10 ships renders, declared as `render` in `src/lib/media.ts` and disclosed on the page. This task stays open until real photographs replace them, or the team decides renders are final.
 - [ ] 6.4 Legal review of the Privacy Policy and Terms, and the Meshtastic trademark notification
   - _Requirements: Q4, Q5_
+- [x] 6.5 `Renting` section, `#renting`, after `Problem`: five steps in the platform's order
+      (register, plan and contract, counter handover, live map with tiered alerts, return and
+      invoice), reusing the `HowItWorks` step structure; a `nav.renting` entry so the navigation
+      and the scrollspy follow it; English and Vietnamese catalogue entries
+  - _Requirements: REQ-UBI-04, REQ-EVT-06, Q3 (2026-11-01, D-033)_
+- [x] 6.6 Hero primary call to action "See rental plans" as a system link with the header's
+      `data-system-link` discovery and its pending state; the secondary goes to `#renting`. The
+      closing call to action uses the same wiring
+  - _Requirements: REQ-EVT-02 to REQ-EVT-04, REQ-STA-01, D-088_
 
 ## Phase 7: Verification and Review 1 readiness
 
