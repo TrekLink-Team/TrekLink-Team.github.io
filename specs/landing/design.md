@@ -74,7 +74,8 @@ page.
 ```text
 specs/landing/           requirements.md, design.md, tasks.md
 src/
-  components/            Header, Hero, Problem, NodeLines, ResearchDevelopment, Footer
+  components/            Header, Hero, Problem, Renting, HowItWorks, NodeLines, Meshtastic, Faq,
+                         CtaBand, Footer
                          LandingPage composes them once, so the locale routes cannot drift
   islands/               SystemLink, Carousel, Scrollspy, LanguageSwitcher
   layouts/               Base.astro: head, skip link, locale wiring
@@ -97,8 +98,9 @@ public/
 | Component | Responsibility |
 |---|---|
 | `Header` | Wordmark, section navigation, language switcher slot, system link slot. Sticky. |
-| `Hero` | The product advert. One product photograph, headline, subheadline. No call to action into the system here; question 11 puts that link in the header. |
-| `Problem` | What no signal on a trek route costs. Written for a general reader. |
+| `Hero` | The advert to trekking agencies. One product image, headline, subheadline. Its primary call to action, "See rental plans", is a system link with the same `data-system-link` discovery as the header (D-088); the discovered URL is the system root, the public plans page. The secondary action scrolls to `#renting`. Changed 2026-11-01; until then question 11 kept every system link in the header. |
+| `Problem` | What no signal on a multi-day route costs an agency, without and with TrekLink. Written for an agency owner or operator. |
+| `Renting` | How renting works, `#renting`: five steps in the platform's order, register, plan and contract, counter handover, live map with tiered alerts, return and invoice. Reuses the step-card structure of `HowItWorks`. Added 2026-11-01. |
 | `NodeLines` | The node versions, as a card grid feeding the carousel island. Named for what it holds: the answer to the hardware question was one node in three versions, v2, v3 and v4, so there is no plural product line to show. v1 is excluded by D-005. |
 | `ResearchDevelopment` | The R&D section from question 12. General and professional, no research question identifiers, no metrics that are not yet measured. |
 | `Footer` | Contact, repository link, copyright. |
