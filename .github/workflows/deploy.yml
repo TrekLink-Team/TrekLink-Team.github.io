@@ -75,14 +75,14 @@ jobs:
           fi
           echo "ok   no timeline inside an animation shorthand"
 
-      # Open question Q1: the operations system is not deployed, so its URL is
-      # a .invalid placeholder and every visitor gets the unavailable toast.
-      # That is safe and intended until the backend exists, so this warns on
-      # every publish instead of failing it.
-      - name: Warn while the operations URL is a placeholder
+      # Open question Q1: the operations system is not deployed, so during the
+      # course the link points at the demo laptop's loopback address and every
+      # other visitor gets the unavailable toast. That is safe and intended until
+      # the backend is hosted, so this warns on every publish instead of failing it.
+      - name: Warn while the operations URL is not a hosted system
         run: |
-          if grep -nE "operationsUrl|healthEndpoint" site.config.ts | grep -F ".invalid"; then
-            echo "::warning file=site.config.ts::The operations system URL is still a .invalid placeholder (Q1)."
+          if grep -nE "operationsUrl|healthEndpoint" site.config.ts | grep -E "\.invalid|localhost|127\.0\.0\.1"; then
+            echo "::warning file=site.config.ts::The operations system URL is a placeholder or the demo laptop's loopback address (Q1)."
           fi
 
       - uses: actions/configure-pages@v5
