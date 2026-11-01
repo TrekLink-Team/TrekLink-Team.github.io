@@ -11,7 +11,7 @@
   "nav.menu.close": "Close the menu",
   "system.link": "Open the system",
   "system.checking": "Checking",
-  "system.toast": "Can't reach the operations system right now. Try again in a moment.",
+  "system.toast": "Can't reach the operations system from here. During the course it runs on the team's demo machine.",
   "system.unavailable.dismiss": "Dismiss",
   "lang.label": "Language",
   "lang.en": "English",
