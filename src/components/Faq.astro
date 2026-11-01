@@ -7,9 +7,9 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 
-/* The objections a trip organiser raises before carrying anything new. Native
+/* The questions a trekking agency asks before renting a fleet. Native
    <details>: keyboard and no-JS behaviour come with the element. */
-const qa = (['a', 'b', 'c'] as const).map((k) => ({
+const qa = (['a', 'b', 'c', 'd', 'e'] as const).map((k) => ({
   q: t(`faq.${k}.q` as TranslationKey),
   a: t(`faq.${k}.a` as TranslationKey),
 }));

@@ -1,6 +1,8 @@
 ---
+import { siteConfig } from '../../site.config';
 import { useTranslations, type Locale } from '../i18n';
 import { media } from '../lib/media';
+import { withUtm } from '../lib/utm';
 
 interface Props {
   locale: Locale;
@@ -32,10 +34,23 @@ const proof = [
       <p class="hero-sub enter" style="--d:2">{t('hero.sub')}</p>
 
       <div class="hero-actions enter" style="--d:3">
-        <a class="btn btn-primary" href="#nodes">
-          {t('hero.cta.primary')} <span class="arrow" aria-hidden="true">→</span>
+        {/* D-088: the same click-time discovery as the header link. The
+            discovered URL is the system root, the public plans page. */}
+        <a
+          class="btn btn-primary"
+          href={withUtm(siteConfig.operationsUrl, { campaign: 'home', content: 'hero-see-plans' })}
+          data-utm-pass
+          data-system-link
+          data-label={t('hero.cta.primary')}
+          data-checking={t('system.checking')}
+          data-toast-message={t('system.toast')}
+          data-toast-dismiss={t('system.unavailable.dismiss')}
+        >
+          <span data-system-link-text>{t('hero.cta.primary')}</span>
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="arrow" aria-hidden="true">→</span>
         </a>
-        <a class="btn btn-ghost" href="#how">{t('hero.cta.secondary')}</a>
+        <a class="btn btn-ghost" href="#renting">{t('hero.cta.secondary')}</a>
       </div>
 
       <ul class="proof enter" style="--d:4">
@@ -140,6 +155,27 @@ const proof = [
     flex-wrap: wrap;
     gap: 0.8rem;
     margin-top: 0.4rem;
+  }
+  /* The pending state of the system link, as in CtaBand (REQ-STA-01). */
+  .hero-actions .spinner {
+    display: none;
+    width: 0.85em;
+    height: 0.85em;
+    border: 2px solid var(--shade);
+    border-top-color: var(--ink-inverse);
+    border-radius: 50%;
+    animation: hero-spin 700ms linear infinite;
+  }
+  .hero-actions [data-state='checking'] .spinner {
+    display: inline-block;
+  }
+  .hero-actions [data-state='checking'] .arrow {
+    display: none;
+  }
+  @keyframes hero-spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .proof {
