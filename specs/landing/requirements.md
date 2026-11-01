@@ -92,7 +92,8 @@ TrekLink service switched off. That independence is the point, not a side effect
 ### State-driven
 
 - **REQ-STA-01**: WHILE the health check is in flight, the system SHALL show a pending state on the
-  header link and SHALL NOT block scrolling, navigation or any other interaction.
+  system link the visitor activated, whichever it is (header, mobile menu, hero or closing call to
+  action), and SHALL NOT block scrolling, navigation or any other interaction.
 - **REQ-STA-02**: WHILE a visitor has reduced motion enabled, the system SHALL disable carousel
   auto-advance and all decorative transitions.
 - **REQ-STA-03**: WHILE the viewport is narrower than the mobile breakpoint, the system SHALL
