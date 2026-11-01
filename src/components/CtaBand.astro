@@ -21,7 +21,7 @@ const t = useTranslations(locale);
       <div class="cta-actions above">
         <a
           class="btn btn-primary"
-          href={withUtm(siteConfig.operationsUrl, { campaign: 'home', content: 'cta-open-system' })}
+          href={withUtm(siteConfig.operationsUrl, { campaign: 'home', content: 'cta-see-plans' })}
           data-utm-pass
           data-system-link
           data-label={t('cta.primary')}
@@ -33,7 +33,7 @@ const t = useTranslations(locale);
           <span class="spinner" aria-hidden="true"></span>
           <span class="arrow" aria-hidden="true">→</span>
         </a>
-        <a class="btn btn-ghost" href="#nodes">{t('cta.secondary')}</a>
+        <a class="btn btn-ghost" href="#renting">{t('cta.secondary')}</a>
       </div>
     </div>
   </div>
