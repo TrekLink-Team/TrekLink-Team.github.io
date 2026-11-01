@@ -10,15 +10,25 @@
 
 ## 1. Domain Context & Scope
 
-**Purpose.** Show the TrekLink product to a public audience and hand a visitor into the operations
-system. It is a showcase, requested by the supervisor, and it is the first artifact the Review 1
-panel will see running.
+**Purpose.** Present TrekLink, as registered ("An Integrated Off-Grid Communication and Smart Device
+Rental Management Platform for Trekking Agencies"), to its audience: trekking agencies and companies
+that run groups beyond phone coverage. The site shows both halves of the product, the LoRa node
+fleet TrekLink owns and maintains, and the operations platform through which a registered
+organization rents those nodes, follows them on a live map, receives tiered alerts and settles its
+invoices. It hands a visitor into the operations system, whose root is the public plans page. It
+is a showcase, requested by the supervisor, and it is the first artifact the review panel sees
+running. SOS is presented as one capability of the platform, not as the problem the project solves
+(2026-11-01, Q3).
 
 **In-Scope**
 
 - A public, statically hosted marketing site at `https://treklink-team.github.io/`
-- Product-first content: hero, problem, node versions, research and development, footer
-- A header link into the operations system, with a live availability check
+- Content for trekking agencies: hero, the agency's problem, how renting works (register the
+  organization, choose a monthly or day plan, collect the nodes at TrekLink's counter, follow the
+  group with tiered alerts, return the nodes and settle the invoice), how an SOS travels, node
+  versions, frequently asked questions, footer
+- Links into the operations system, with a live availability check: the header link, the hero's
+  primary call to action and the closing call to action, all through the same discovery (D-088)
 - English and Vietnamese through a real locale system, English shipped first
 - Cookieless analytics
 - WCAG 2.1 AA conformance
@@ -152,6 +162,6 @@ TrekLink service switched off. That independence is the point, not a side effect
 |---|---|---|
 | ~~Q1~~ | ~~The exact operations system URL and its health endpoint path.~~ **Resolved 2026-11-01 by D-088:** the site does not hold the answer. It reads `deploy/system-endpoints.json` from `treklink-web` `main` at click time and opens the first candidate whose health route answers; moving the system edits that file, never this site, so GitHub Pages and Vercel behave the same. Today the file lists only the demo laptop (`http://localhost:5173/`, health `http://localhost:3000/api/health`), which is also the built-in fallback in `site.config.ts`. The health route answers any origin (treklink-web platform REQ-EVT-04); Chrome asks the visitor once for local network access to the laptop. | Nothing. |
 | ~~Q2~~ | ~~Which analytics provider.~~ **Resolved 2026-09-22: Cloudflare Web Analytics.** Free, cookieless, one beacon script, and no proxying of the site through Cloudflare is required. GoatCounter was the alternative and was rejected on licensing: its free tier is for non-commercial use, and a graded university project sits ambiguously against that clause. Plausible is paid, and self-hosting Umami would mean running a backend, which contradicts REQ-UBI-01. The leader supplies the account and the site token. | Nothing. |
-| ~~Q3~~ | ~~Final copy for the hero and the problem section.~~ **Resolved 2026-09-23: the drafted copy is approved as final.** The hero and problem wording shipped in phase 3 stands; it is no longer a placeholder. 2026-09-24: the delivery claims were softened after review of PR #10 ("every event syncs" and similar), because absolute delivery promises contradicted the Terms' "not a guarantee of rescue" section. | Nothing. |
+| ~~Q3~~ | ~~Final copy for the hero and the problem section.~~ **Resolved 2026-09-23: the drafted copy is approved as final.** The hero and problem wording shipped in phase 3 stands; it is no longer a placeholder. 2026-09-24: the delivery claims were softened after review of PR #10 ("every event syncs" and similar), because absolute delivery promises contradicted the Terms' "not a guarantee of rescue" section. 2026-11-01: the copy was realigned to the registered title (D-033): the audience is trekking agencies, the content presents the rental platform as well as the hardware, a "How renting works" section was added, and SOS moved from the problem statement to one capability. Old and new strings are tabled in `docs/sessions/2026-11-01-landing-copy.md`. | Nothing. |
 | Q4 | Legal review of `src/content/legal.ts` against Law 91/2025/QH15 and Decree 356/2025/ND-CP. Drafted by the team, not by counsel. Open points: whether cookieless Cloudflare Web Analytics needs a consent step (Decree 356 lists online behavioural tracking data as sensitive); whether the cross-border transfer impact assessment dossier applies to a student team using GitHub Pages and Cloudflare; whether any statutory response deadline should be stated; FPT University's IP policy on capstone output; GPL-3.0 obligations if `treklink-firmware` derives from Meshtastic and devices are ever handed out. **Resolved 2026-09-24:** contact is `treklink.team@gmail.com` (in `site.config.ts`), the Vietnamese version prevails, and the Terms keep the MY_433 band statement at the leader's instruction. | Public launch. |
 | Q5 | Meshtastic's trademark guidelines ask for a copy of any use of their marks to be sent to `trademark@meshtastic.org` within seven days of first use. The Vercel preview of PR #10 made the use public on 2026-09-24. | Nothing technical. A team action, due by 2026-10-01. |
