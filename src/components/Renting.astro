@@ -1,0 +1,96 @@
+---
+import { useTranslations, type Locale, type TranslationKey } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+/*
+ * How renting works, in the order the operations platform runs it:
+ * registration, plan and contract, counter handover, live map with tiered
+ * alerts, return and invoice (treklink-web specs: organizations, rentals,
+ * incidents, billing). The step list reuses the structure and styles of the
+ * HowItWorks steps, so the two numbered sequences on the page read alike.
+ */
+const steps = (['a', 'b', 'c', 'd', 'e'] as const).map((k, i) => ({
+  n: String(i + 1).padStart(2, '0'),
+  title: t(`renting.${k}.title` as TranslationKey),
+  body: t(`renting.${k}.body` as TranslationKey),
+}));
+---
+
+<section class="section renting" id="renting" aria-labelledby="renting-heading">
+  <div class="shell">
+    <header class="section-head" data-reveal>
+      <p class="eyebrow">{t('renting.eyebrow')}</p>
+      <h2 id="renting-heading">{t('renting.heading')}</h2>
+      <p class="renting-lede">{t('renting.lede')}</p>
+    </header>
+
+    <ol class="steps">
+      {
+        steps.map((s, i) => (
+          <li class="step" data-reveal style={`--i:${i}`}>
+            <span class="step-n" aria-hidden="true">
+              {s.n}
+            </span>
+            <h3>{s.title}</h3>
+            <p>{s.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .renting-lede {
+    color: var(--ink-muted);
+    font-size: var(--step-1);
+    line-height: 1.55;
+    max-width: 60ch;
+  }
+
+  /* Same step card as HowItWorks; five steps instead of three. */
+  .steps {
+    list-style: none;
+    margin: clamp(2rem, 1.4rem + 2.6vw, 3.2rem) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .step {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+    padding: 1.2rem 0.2rem 0;
+    border-top: 2px solid var(--surface-ridge);
+  }
+  .step-n {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--step-1);
+    color: var(--brass);
+  }
+  .step h3 {
+    font-size: var(--step-2);
+  }
+  .step p {
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 1099px) {
+    .steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 799px) {
+    .steps {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

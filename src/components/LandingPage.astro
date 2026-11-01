@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Header from './Header.astro';
 import Hero from './Hero.astro';
 import Problem from './Problem.astro';
+import Renting from './Renting.astro';
 import NodeLines from './NodeLines.astro';
 import HowItWorks from './HowItWorks.astro';
 import Meshtastic from './Meshtastic.astro';
@@ -27,6 +28,7 @@ const { locale } = Astro.props;
   <main id="main" tabindex="-1">
     <Hero locale={locale} />
     <Problem locale={locale} />
+    <Renting locale={locale} />
     <HowItWorks locale={locale} />
     <NodeLines locale={locale} />
     <Meshtastic locale={locale} />
