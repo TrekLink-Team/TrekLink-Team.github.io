@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { checkAvailability } from './health';
+import {
+  checkAvailability,
+  loadCandidates,
+  MAX_CANDIDATE_TIMEOUT_MS,
+  parseEndpoints,
+  resolveSystem,
+  type SystemCandidate,
+} from './health';
 
 const endpoint = 'https://example.invalid/health';
 
@@ -64,5 +71,83 @@ describe('checkAvailability', () => {
       fetchImpl: undefined as unknown as typeof fetch,
     });
     expect(typeof up).toBe('boolean');
+  });
+});
+
+// D-088: the system's location is read at runtime from treklink-web.
+const laptop: SystemCandidate = {
+  url: 'http://localhost:5173/',
+  health: 'http://localhost:3000/api/health',
+  timeoutMs: 10_000,
+};
+const hosted: SystemCandidate = {
+  url: 'https://app.example.test/',
+  health: 'https://api.example.test/api/health',
+  timeoutMs: 3_000,
+};
+const endpointsUrl = 'https://raw.example.test/system-endpoints.json';
+
+describe('parseEndpoints', () => {
+  it('reads a version 1 file in order', () => {
+    expect(parseEndpoints({ version: 1, candidates: [hosted, laptop] })).toEqual([hosted, laptop]);
+  });
+
+  it('caps a candidate timeout', () => {
+    const [only] = parseEndpoints({ version: 1, candidates: [{ ...laptop, timeoutMs: 999_999 }] })!;
+    expect(only.timeoutMs).toBe(MAX_CANDIDATE_TIMEOUT_MS);
+  });
+
+  it('skips malformed entries and rejects a file with none left', () => {
+    expect(
+      parseEndpoints({
+        version: 1,
+        candidates: [{ ...hosted, url: 'javascript:alert(1)' }, laptop, { url: 'x' }, null],
+      }),
+    ).toEqual([laptop]);
+    expect(parseEndpoints({ version: 1, candidates: [{ ...laptop, timeoutMs: -1 }] })).toBeNull();
+  });
+
+  it.each([null, 'text', { version: 2, candidates: [laptop] }, { version: 1 }])(
+    'rejects %j',
+    (data) => {
+      expect(parseEndpoints(data)).toBeNull();
+    },
+  );
+});
+
+describe('loadCandidates', () => {
+  const load = (fetchImpl: typeof fetch) =>
+    loadCandidates({ endpointsUrl, timeoutMs: 100, fallback: laptop, fetchImpl });
+
+  it('uses the file when it reads', async () => {
+    const fetchImpl = async () =>
+      new Response(JSON.stringify({ version: 1, candidates: [hosted, laptop] }));
+    expect(await load(fetchImpl as typeof fetch)).toEqual([hosted, laptop]);
+  });
+
+  it.each([
+    ['a non-success status', async () => new Response('gone', { status: 404 })],
+    ['a rejected request', async () => Promise.reject(new TypeError('Failed to fetch'))],
+    ['a body that is not JSON', async () => new Response('<html>')],
+    ['a malformed file', async () => new Response(JSON.stringify({ version: 1, candidates: [] }))],
+  ])('falls back to the built-in candidate on %s', async (_label, fetchImpl) => {
+    expect(await load(fetchImpl as unknown as typeof fetch)).toEqual([laptop]);
+  });
+});
+
+describe('resolveSystem', () => {
+  const answering = (up: string[]) =>
+    (async (url: string | URL | Request) =>
+      new Response('ok', { status: up.includes(String(url)) ? 200 : 503 })) as typeof fetch;
+
+  it('opens the first candidate that answers', async () => {
+    expect(await resolveSystem([hosted, laptop], answering([hosted.health, laptop.health]))).toBe(
+      hosted.url,
+    );
+    expect(await resolveSystem([hosted, laptop], answering([laptop.health]))).toBe(laptop.url);
+  });
+
+  it('returns null when none answers', async () => {
+    expect(await resolveSystem([hosted, laptop], answering([]))).toBeNull();
   });
 });
