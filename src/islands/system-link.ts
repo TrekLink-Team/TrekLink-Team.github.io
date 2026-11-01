@@ -1,4 +1,4 @@
-import { checkAvailability } from '../lib/health';
+import { loadCandidates, resolveSystem } from '../lib/health';
 import { siteConfig } from '../../site.config';
 
 /**
@@ -50,6 +50,19 @@ function buildToast(strings: ToastStrings): HTMLElement {
   return toast;
 }
 
+/** The discovered URL with the link's own query (its UTM tags) carried over. */
+function withLinkQuery(target: string, href: string): string {
+  try {
+    const destination = new URL(target);
+    new URL(href).searchParams.forEach((value, key) => {
+      destination.searchParams.set(key, value);
+    });
+    return destination.toString();
+  } catch {
+    return target;
+  }
+}
+
 export function mountSystemLink(): void {
   document
     .querySelectorAll<HTMLAnchorElement>('[data-system-link]')
@@ -95,18 +108,26 @@ function upgradeLink(link: HTMLAnchorElement): void {
     link.setAttribute('aria-busy', 'true');
     if (textNode) textNode.textContent = checkingLabel;
 
-    const up = await checkAvailability({
-      endpoint: siteConfig.healthEndpoint,
-      timeoutMs: siteConfig.healthTimeoutMs,
+    // D-088: where the system runs is read now, not at build time, so the
+    // site never needs a release when the system moves.
+    const candidates = await loadCandidates({
+      endpointsUrl: siteConfig.systemEndpointsUrl,
+      timeoutMs: siteConfig.systemEndpointsTimeoutMs,
+      fallback: {
+        url: siteConfig.operationsUrl,
+        health: siteConfig.healthEndpoint,
+        timeoutMs: siteConfig.healthTimeoutMs,
+      },
     });
+    const target = await resolveSystem(candidates);
 
     inFlight = false;
     delete link.dataset.state;
     link.removeAttribute('aria-busy');
     if (textNode) textNode.textContent = idleLabel;
 
-    if (up) {
-      window.location.href = link.href;
+    if (target) {
+      window.location.href = withLinkQuery(target, link.href);
       return;
     }
 
