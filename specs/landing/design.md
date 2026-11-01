@@ -47,8 +47,9 @@ flowchart TD
     B --> C["GitHub Actions: actions/deploy-pages"]
     C --> D["https://treklink-team.github.io/"]
     D --> E["Visitor"]
-    E -->|"activates header link"| F["Health check island"]
-    F -->|"200 within timeout"| G["Navigate to operations system"]
+    E -->|"activates a system link"| R["Read deploy/system-endpoints.json from treklink-web"]
+    R -->|"candidates, or the built-in fallback"| F["Health check island, each candidate in order"]
+    F -->|"200 within timeout"| G["Navigate to that candidate"]
     F -->|"error, non-200, or timeout"| H["Toast: service currently unavailable"]
     H --> E
 ```
@@ -136,9 +137,11 @@ the keyboard, and announces item changes through a live region (REQ-EVT-07).
 
 | Key | Purpose | Initial value |
 |---|---|---|
-| `operationsUrl` | Where the header link goes | the demo laptop's frontend, `http://localhost:5173/`, until the backend is deployed, open question Q1 |
-| `healthEndpoint` | What the availability check requests | the demo laptop's backend health route, `http://localhost:3000/api/health`, Q1 |
-| `healthTimeoutMs` | Abort threshold | `3000` |
+| `systemEndpointsUrl` | The runtime list of where the system runs | `treklink-web` `main` `deploy/system-endpoints.json`, D-088 |
+| `operationsUrl` | Fallback candidate and the no-JavaScript href | the demo laptop's frontend, `http://localhost:5173/` |
+| `healthEndpoint` | Fallback candidate's availability check | the demo laptop's backend health route, `http://localhost:3000/api/health` |
+| `healthTimeoutMs` | Fallback candidate's abort threshold | `10000`, time to answer Chrome's local network prompt |
+| `systemEndpointsTimeoutMs` | Abort threshold for reading the list | `3000` |
 | `contactEmail` | Private address for privacy and legal requests, named in both legal pages | `treklink.team@gmail.com`, Q4 |
 | `analyticsToken` | Cloudflare Web Analytics site token | empty string until the leader supplies it. Empty means the beacon is not rendered at all, phase 5 |
 | `site` | Canonical origin, used for absolute URLs | `https://treklink-team.github.io` |
