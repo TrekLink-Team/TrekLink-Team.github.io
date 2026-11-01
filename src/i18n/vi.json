@@ -12,7 +12,7 @@
   "nav.menu.close": "Đóng menu",
   "system.link": "Mở hệ thống",
   "system.checking": "Đang kiểm tra",
-  "system.toast": "Chưa kết nối được hệ thống vận hành. Vui lòng thử lại sau giây lát.",
+  "system.toast": "Không kết nối được hệ thống vận hành từ đây. Trong khuôn khổ đồ án, hệ thống chạy trên máy demo của nhóm.",
   "system.unavailable.dismiss": "Đóng",
   "lang.label": "Ngôn ngữ",
   "lang.en": "English",
