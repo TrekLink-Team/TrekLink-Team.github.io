@@ -31,3 +31,12 @@ ignore/
 # home, since the graded reports want the same photographs. To regenerate the
 # brand assets, put the logo artwork back here and run scripts/build-brand-assets.sh.
 source-photos/
+
+# design-sync (claude.ai/design) build state
+.ds-sync/
+.ds-pkg/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+.design-sync/*.log
