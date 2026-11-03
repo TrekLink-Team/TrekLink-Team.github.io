@@ -1,0 +1,12 @@
+{
+  "projectId": "a412a15e-e5d2-46c1-946a-97195221e8bb",
+  "shape": "package",
+  "pkg": "@treklink/landing",
+  "globalName": "TrekLinkLanding",
+  "buildCmd": "npx astro build && node .design-sync/build-pkg.mjs",
+  "entry": ".ds-pkg/dist/index.js",
+  "srcDir": "dist",
+  "cssEntry": "dist/styles.css",
+  "guidelinesGlob": [],
+  "readmeHeader": ".design-sync/conventions.md"
+}
